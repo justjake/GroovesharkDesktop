@@ -25,6 +25,11 @@ with.
 Unversioned (29 January 2011): initial release
 */
 
+/* KNOWN ISSUES
+0.01:
+ * Dock control crashes Fluid
+ * Multiple Growl notifications
+*/
 
 console.log("writing deepCopy");
 
