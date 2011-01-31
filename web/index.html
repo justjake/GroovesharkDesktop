@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+	"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title>Grooveshark Desktop | Jake Teton-Landis</title>
+	<link rel="stylesheet" href="/css.css" type="text/css" />
+</head>
+
+<!-- 
+NOTE: this website's code aims to be as quick and simple as possible.
+Don't judge me.
+-->
+
+<body>
+	<div id="wrap">
+		<h2 class="first">Grooveshark Desktop <a href="#downloads" class="right bright">Download</a></h2>
+		<p>
+			This is an unofficial desktop client for Grooveshark.com. It features:
+			<ul>     
+				<li>Media key support</li>
+				<li>Growl notifications</li>
+				<li>reduced pixel waste</li>
+				<li>native Last.fm support</li>
+				<li>fullscreen mode</li>
+			</ul>
+		</p>
+		<p>
+			<img src="GS-Desktop-Preview.png" alt="The application" />
+		</p>
+		<h2 id="downloads">downloads</h2>
+		<p>
+			<a class="halfwidth" href="Grooveshark.pkg"><img src="package.png" alt="Download isntaller package"/>Installer Package</a>
+			<a href="GroovesharkDesktop.sparseimage.zip" class="halfwidth"><img src="dmg.png" alt="Download disk image" />Disk Image</a>                      
+			<br style="clear: both; height: 10px;"/>
+			<span style="clear: both;">I recommend that you install using the installer package. If you are wary of installing from a package, 
+				a disk image is provided for your convenience.
+			</span>
+		</p>
+		<h2>coming soon</h2>
+		<p>
+			<ul>
+				<li>minimize to miniController (think Bowtie!)</li>
+				<li>JSON loading of miniController themes</li>
+				<li>Live browsing and selection of said themes from a hosted repository</li>
+			</ul>
+		</p>           
+		<h2>get in touch</h2>
+		<p>
+			You can contact me via email by looking at <a href="/index.html">my homepage</a>.
+			You can discuss and comment on my application at either 
+			<a href="http://macthemes.net/forum/viewtopic.php?id=16808485" target="_blank">MacThemes forum</a> or
+			<a href="http://just--jake.deviantart.com/art/Grooveshark-Desktop-195601622" target="_blank">DeviantArt</a>.
+		<h2>changelog</h2>     
+		<p>
+			<ul>
+				<li>0.02 <ul>
+					<li>Window now chromeless</li>
+					<li>shrink and maximize added</li>
+					<li>removed dock controls due to bugs in Fluid.app</li>
+				</ul></li>                                                 
+				<li>0.01 <ul>
+					<li>Initial release</li>
+				</ul></li>             
+			</ul>
+		</p>
+		<h2>known issues</h2>
+		<p>
+			<ul>
+				<li>0.02 <ul>                            
+					<li>minify and maximize don't play well together. Click a second time to get the behavior you want</li>
+					<li>Close button does nothing</li>
+					<li>Dragging the window too fast results in frustration</li>
+					<li>You may need to refresh after logging in/out to squash ads</li>
+				</ul></li>                                                      
+				<li>0.01 <ul>
+					<li>Very determined to use Mellow (Theme 93). Will switch back to Theme 93 if Grooveshark tries to send you advertisement themes</li>
+					<li>Using the dock controls may cause crashes</li>
+					<li>Some special cases cause multiple Growl notifications</li>
+				</ul></li>
+			</ul>
+		</p>          
+		<h2>Notes</h2>
+		<p>
+			Some visual resources will be retrieved from jake.teton-landis.org
+		</p>
+		<p>
+			As Grooveshark will change their application code without notice, I'm abstracting some important functionality, like player control, to provide a stable API for possible remote authors, if I ever get themes off the ground.
+        </p><p>
+			If you want to hack on this script, I'd recommend downloading a copy of Grooveshark's app.js file. You can use Opera 9.27 and http://www.howtocreate.co.uk/tutorials/jsexamples/JSTidy.html to tidy up the code.
+        </p><p>
+			Unfortunately, core.js does not run in Opera 9.27 so that's too hard to deal with. As such, all Grooveshark features dealt with in core.js will remain (mostly) untampered with.
+		</p>
+		
+	</div>
+
+
+</body>
+</html>
