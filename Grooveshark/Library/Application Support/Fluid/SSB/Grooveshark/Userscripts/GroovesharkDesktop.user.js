@@ -23,13 +23,18 @@ with.
 
 /* CHANGELOG
 Unversioned (29 January 2011): initial release
-0.02: Window now chromeless
+0.02
+	Window now chromeless
+	shrink and maximize added
+	removed dock control because all it does is crash
 */
 
 /* KNOWN ISSUES
-0.01:
- * Dock control crashes Fluid
- * Multiple Growl notifications
+0.02
+	Close button does nothing
+0.01
+	Dock control crashes Fluid
+	Multiple Growl notifications
 */
 
 /* TODO
@@ -141,7 +146,7 @@ gsFluid = {			// global object
 			list: function() {
 				return GS.theme.themes;
 			},
-			showUI: function() {											//TODO!!!!!!
+			showUI: function() {											//TODO!!!!!! // who cares
 				return false;
 			}
 		},	// end gsFluid.theme
@@ -158,13 +163,16 @@ gsFluid = {			// global object
 						} else { menu.push("Paused"); }
 						menu.push('  '+gsFluid.player.song().title);
 						menu.push('  '+gsFluid.player.song().artist);
-						if (GS.player.isPlaying) {
-							menu.push( ["Pause", gsFluid.player.togglePlay] );
-						} else { 
-							menu.push( ["Play", gsFluid.player.togglePlay] ); 
-						}
-						menu.push( ["Next", gsFluid.player.next] );
-						menu.push( ["Previous", gsFluid.player.prev] );
+						
+						// ALL THIS DOES IS CRASH FLUID:
+						
+						// if (GS.player.isPlaying) {
+						// 	menu.push( ["Pause", gsFluid.player.togglePlay] );
+						// } else { 
+						// 	menu.push( ["Play", gsFluid.player.togglePlay] ); 
+						// }
+						// menu.push( ["Next", gsFluid.player.next] );
+						// menu.push( ["Previous", gsFluid.player.prev] );
 					}
 					return menu.reverse();
 				},
@@ -372,12 +380,12 @@ gsFluid = {			// global object
 			toggleSmall: function( store ) {
 				$store = $(this);
 				if ( $store.data('normalSize') ) {
-					window.resizeTo($store.data('normalSize').w, $store.data('normalSize').h);
+					window.resizeTo(window.outerWidth, $store.data('normalSize').h);
 					//window.moveTo($store.data('normalSize').x, $store.data('normalSize').y);
 					$store.data('normalSize', false);
 				} else {
 					$store.data('normalSize', {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop} );
-					window.resizeTo(812,109); // should be big enough.
+					window.resizeTo(window.outerWidth,109); // should be big enough.
 				}
 			},
 			toggleMaximize: function( store ) {
