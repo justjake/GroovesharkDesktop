@@ -1,5 +1,6 @@
 // ==UserScript==
 // @name        Grooveshark Desktop
+// @version		0.02
 // @namespace   http://fluidapp.com
 // @description The unofficial Grooveshark desktop client, built withg Fluid. Features dock control, badges for social notifications, premium mode, and Growl notifications.
 // @include     http://listen.grooveshark.com/*
@@ -20,16 +21,18 @@ Unfortunately, core.js does not run in Opera 9.27 so that's too hard to deal
 with.
 */
 
-// HACKY
-// function deepCopy(obj) {
-// 	return JSON.parse(
-// 			JSON.stringify(obj)
-// 		);
-// }
+/* CHANGELOG
+Unversioned (29 January 2011): initial release
+*/
+
+/* KNOWN ISSUES
+0.01:
+ * Dock control crashes Fluid
+ * Multiple Growl notifications
+*/
 
 console.log("writing deepCopy");
 
-// superior
 function deepCopy(obj) {
     if (Object.prototype.toString.call(obj) === '[object Array]') {
         var out = [], i = 0, len = obj.length;
@@ -98,9 +101,8 @@ gsFluid = {			// global object
 						duration: 0	
 					};
 				}
-			},
-			
-		},		
+			}, 	//end song
+		},	//end gsFluid.player
 		theme: {		// set current list showUI (showUI unimplemented)
 			init: function() {
 				// remap themeing function to prevent ad themes
@@ -133,7 +135,7 @@ gsFluid = {			// global object
 			showUI: function() {											//TODO!!!!!!
 				return false;
 			}
-		},	
+		},	// end gsFluid.theme
 		dock: {
 			menu: { // the dock menu management system is cool, you should use it for your other Fluid Projects
 				_current: [],
@@ -182,7 +184,7 @@ gsFluid = {			// global object
 					}
 					// run again because we're paranoid ? Maybe later
 				}
-			},
+			}, // end gsFluid.dock.menu
 			init: function() {
 				// check badge sometimes
 				gsFluid.dock.badge();
@@ -209,9 +211,8 @@ gsFluid = {			// global object
 				gsFluid.dock.menu.write( gsFluid.dock.menu.build() );
 			}
 		
-		},		
-		remote: {},		// handle the remote (DISTANT FUTURE)
-		
+		}, // end gsFluid.dock
+						
 		growl: {		// I'm putting this in an object incase we add other notifications later
 			notificationForSong: function(song) {
 				var minutes = Math.floor(song.duration/60);
@@ -228,6 +229,78 @@ gsFluid = {			// global object
 					icon: song.coverart
 				} );
 			}
+		}, // end gsFluid.growl
+		
+		window: { // controls windows
+			absCoords: function ( localX, localY ) {
+				// var windowBufferX = window.outerWidth - window.innerWidth;
+				// var windowBufferY = window.outerHeight - window.innerHeight;
+
+				// var transformationX = window.screenLeft + windowBufferX;
+				// var transformationY = window.screenTop + windowBufferY;
+
+				return [
+					localX + window.screenLeft + window.outerWidth - window.innerWidth,
+					localY + window.screenTop + window.outerHeight - window.innerHeight
+				];
+			},
+			
+			makeBar: function( $el ) {
+				$el = jQuery($el); 
+				// you can only make draggable once
+				if ($el.data('isDraggable')) {
+					return false;
+				}
+				$el.data('isDraggable', true);
+
+				// Move the $el by the amount of change in the mouse position  
+				var move = function(event) {  
+					if($el.data('mouseMove')) {
+						var coords = gsFluid.window.absCoords( event.clientX, event.clientY);	
+
+						var changeX = coords[0] - $el.data('mouseX');  
+						var changeY = coords[1] - $el.data('mouseY');// - (window.outerHeight-window.innerHeight);  
+						console.log("change",changeX, changeY);
+
+						var newX = window.screenLeft + changeX;  
+						var newY = window.screenTop + changeY;  
+
+						// $el.css('left', newX);  
+						// $el.css('top', newY);  
+						//window.moveTo(newX, newY);
+						window.moveBy(changeX,changeY);
+
+						$el.data('mouseX', coords[0]);  
+						$el.data('mouseY', coords[1]);  
+						console.log("window at ",window.screenLeft,window.screenTop);
+					}  
+				}  
+
+				$el.mousedown(function(event) {  
+					//console.log('mouse down in ', $el, event);
+					$el.data('mouseMove', true);  
+					var coords = gsFluid.window.absCoords( event.clientX, event.clientY);
+					$el.data('mouseX', coords[0]);  
+					$el.data('mouseY', coords[1]);  
+				});  
+
+				$el.parents(':last').mouseup(function() {  
+					//console.log('mouse up in ', $el, event);
+					$el.data('mouseMove', false);  
+				});  
+
+				$el.mouseout(move);  
+				$el.mousemove(move);  
+
+				// this isn't jQuery unless it returns the element.
+				console.log("This element now is a window draggable", $el);
+				return $el;
+			}, // end makeBar
+			init: function() {
+				// the window is now draggable by the header bar
+				gsFluid.window.makeBar( $('#header') );
+			}
+			
 		},
 		
 		enablePremium: function() {
@@ -247,8 +320,10 @@ gsFluid = {			// global object
 				backward: gsFluid.player.prev,
 				play: gsFluid.player.togglePlay
 			};	
+			console.log("Initializing gsFluid.window");
+			gsFluid.window.init();
 		}
-}
+} // end gsFluid
 
 console.log("Trying to fluid");
 
