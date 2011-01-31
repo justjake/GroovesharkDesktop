@@ -23,12 +23,21 @@ with.
 
 /* CHANGELOG
 Unversioned (29 January 2011): initial release
+0.02: Window now chromeless
 */
 
 /* KNOWN ISSUES
 0.01:
  * Dock control crashes Fluid
  * Multiple Growl notifications
+*/
+
+/* TODO
+1. minimize to miniController
+2. JSON loading of miniController themes
+    * how do I handle CSS and unsafe scripts?
+    * eval() !?!?!?
+3. 
 */
 
 console.log("writing deepCopy");
@@ -205,6 +214,7 @@ gsFluid = {			// global object
 				}
 			},
 			update: function( data ){
+				window.title = 'Grooveshark';
 				if ( gsFluid.player.isPlaying() ) {
 					gsFluid.growl.notificationForSong(gsFluid.player.song());
 				}
@@ -260,7 +270,7 @@ gsFluid = {			// global object
 
 						var changeX = coords[0] - $el.data('mouseX');  
 						var changeY = coords[1] - $el.data('mouseY');// - (window.outerHeight-window.innerHeight);  
-						console.log("change",changeX, changeY);
+						//console.log("change",changeX, changeY);
 
 						var newX = window.screenLeft + changeX;  
 						var newY = window.screenTop + changeY;  
@@ -272,7 +282,7 @@ gsFluid = {			// global object
 
 						$el.data('mouseX', coords[0]);  
 						$el.data('mouseY', coords[1]);  
-						console.log("window at ",window.screenLeft,window.screenTop);
+						//console.log("window at ",window.screenLeft,window.screenTop);
 					}  
 				}  
 
@@ -296,12 +306,110 @@ gsFluid = {			// global object
 				console.log("This element now is a window draggable", $el);
 				return $el;
 			}, // end makeBar
+			drawTrafficLights: function( $el ) {
+				var lightProto = $('<a />').css({
+					'display':		"block", 
+					'float':		'left',
+					'margin-left':	'9px',
+					'margin-top':	'13px',
+					'width':		'12px',
+					'height':		'13px'
+				})
+				
+				var close = lightProto.clone()
+					.css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "close_active.png')")
+					.hover(function(){ 
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "close_over.png')");
+						}, function (){
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "close_active.png')");
+						}).mousedown(function(){
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "close_down.png')");
+						}).mouseup(function(){
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "close_over.png')");
+							console.log('trying to terminate');
+							window.fluid.terminate();
+						})
+					.appendTo($el);
+				
+				var minimize = lightProto.clone()
+					.css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "min_active.png')")
+					.hover(function(){ 
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "min_over.png')");
+						}, function (){
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "min_active.png')");
+						}).mousedown(function(){
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "min_down.png')");
+						}).mouseup(function(){
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "min_over.png')");
+							console.log('trying to hide');
+							window.fluid.hide();
+							
+							// we pass 'this' along for a place to save isMinimized and other data
+							gsFluid.window.toggleSmall( this );
+							
+						})
+					.appendTo($el);
+
+				var maximize = lightProto.clone()
+					.css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "max_active.png')")
+					.hover(function(){ 
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "max_over.png')");
+						}, function (){
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "max_active.png')");
+						}).mousedown(function(){
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "max_down.png')");
+						}).mouseup(function(){
+							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "max_over.png')");
+							console.log('trying to maximize');
+							
+							gsFluid.window.toggleMaximize( this );
+							
+						})
+					.appendTo($el);
+					
+				return $el;
+			}, // end gsFluid.window.drawTrafficLights
+			toggleSmall: function( store ) {
+				$store = $(this);
+				if ( $store.data('normalSize') ) {
+					window.resizeTo($store.data('normalSize').w, $store.data('normalSize').h);
+					//window.moveTo($store.data('normalSize').x, $store.data('normalSize').y);
+					$store.data('normalSize', false);
+				} else {
+					$store.data('normalSize', {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop} );
+					window.resizeTo(812,109); // should be big enough.
+				}
+			},
+			toggleMaximize: function( store ) {
+				$store = $(this);
+				if ( $store.data('normalSize') ) {
+					window.resizeTo($store.data('normalSize').w, $store.data('normalSize').h);
+					window.moveTo($store.data('normalSize').x, $store.data('normalSize').y);
+					$store.data('normalSize', false);
+				} else {
+					$store.data('normalSize', {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop} );
+					window.resizeTo(5000,5000); // should be big enough.
+				}
+			},
+			
 			init: function() {
 				// the window is now draggable by the header bar
 				gsFluid.window.makeBar( $('#header') );
+				
+				// move header contents right so we can make some traffic lights
+				$('#grooveshark').css('left', 80);
+				$('#nav').css('left', 215);
+				
+				//traffic lights
+				gsFluid.window.drawTrafficLights( $('#header') );
 			}
 			
-		},
+		}, // end gsFluid.window
+		
+		resources: {
+			r: 'http://jake.teton-landis.org/projects/gsFluid/resources/',
+			lights: 'smalltraffic/'
+		}, // end gsFluid.resources
 		
 		enablePremium: function() {
 			GS.user.IsPremium = 1;
@@ -309,6 +417,7 @@ gsFluid = {			// global object
 		},
 		
 		init: function() {
+			// gsFluid.resources = 'file:/' + window.fluid.resourcePath + 'gsFluid/';  // app path resources
 			console.log("Initializing gsFluid.theme");
 			gsFluid.theme.init();
 			console.log("running gsFluid.enablePremium");
@@ -324,6 +433,34 @@ gsFluid = {			// global object
 			gsFluid.window.init();
 		}
 } // end gsFluid
+
+/*
+microControllerExample = {
+	metadata: {
+		title:	"microController",
+		author:	"Jake Teton-Landis",
+		email:	"just.1.jake@gmail.com", 
+		url:	"http://jake.teton-landis.org",
+		img:	null
+	},
+	usesCustomJS: false,	// allows you to supply custom javascript for your theme
+	customJS: null,			// note that if you use custom js, no controls will be
+	width: 	812,			// automatically created for you except the drag bar
+	height:	214,
+	html:	'
+	<div id="microController">
+		<!-- everthing goes inside div#microController -->
+	</div>
+	',						// these controls automatically bound to the supplied selectors
+	drag:	'.dragbar',
+	pause:	'.pause',
+	play:	'.play',
+	next:	'.next',
+	prev:	'.prev',
+	art:	'.coverart',
+	song:	{title: '.title', artist: '.artistName', album: '.albumName'}
+}
+*/
 
 console.log("Trying to fluid");
 
