@@ -22,7 +22,8 @@ with.
 */
 
 /* CHANGELOG
-Unversioned (29 January 2011): initial release
+Unversioned (29 January 2011)
+	initial release
 0.02
 	Window now chromeless
 	shrink and maximize added
@@ -222,7 +223,7 @@ gsFluid = {			// global object
 				}
 			},
 			update: function( data ){
-				window.title = 'Grooveshark';
+				document.title = 'Grooveshark';
 				if ( gsFluid.player.isPlaying() ) {
 					gsFluid.growl.notificationForSong(gsFluid.player.song());
 				}
