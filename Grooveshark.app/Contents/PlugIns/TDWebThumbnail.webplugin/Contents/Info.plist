@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>TDWebThumbnail</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.cruzapp.TDWebThumbnail</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>TDWebThumbnail</string>
+	<key>CFBundlePackageType</key>
+	<string>WBPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.1</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.1</string>
+	<key>NSPrincipalClass</key>
+	<string>TDWebThumbnailPlugInView</string>
+	<key>WebPluginDescription</key>
+	<string>Displays Thumbnail images of a given web page.</string>
+	<key>WebPluginMIMETypes</key>
+	<dict>
+		<key>application/x-webthumbnail</key>
+		<dict>
+			<key>WebPluginTypeDescription</key>
+			<string>Thumbnail Image</string>
+		</dict>
+	</dict>
+	<key>WebPluginName</key>
+	<string>Web Thumbnail Plug-in</string>
+</dict>
+</plist>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   Config.plist
+   ThumbnailPlugIn
+
+   Created by Todd Ditchendorf on 3/23/08.
+   Copyright 2008 Todd Ditchendorf. All rights reserved.
+-->
+<plist version="1.0">
+    <dict>
+		<key>TODBrowserThumbnailPlugInViewType</key>
+		<integer>0</integer>
+		<key>TODBrowserThumbnailPlugInMaxWebViews</key>
+		<integer>20</integer>
+		<key>TODBrowserThumbnailPlugInCustomizedSites</key>
+		<array>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*google.com/search*</string>
+				<key>query</key>
+				<string>#res h3.r a</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*google.com/blogsearch*</string>
+				<key>query</key>
+				<string>xpath://*[@id="m"]//a[starts-with(@id, "p-")]</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://news.google.com*</string>
+				<key>query</key>
+				<string>xpath://div[@class="lh"]//a[b]</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*friendfeed.com/*</string>
+				<key>query</key>
+				<string>xpath://div[@class="title"]//a[not(starts-with(@href, "http://twitter.com"))]</string>
+				<!--<string>#feed .link a</string>-->
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://delicious.com/*</string>
+				<key>query</key>
+				<string>a.taggedlink</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://ma.gnolia.com/*</string>
+				<key>query</key>
+				<string>#hotmarks_list li h3 a.entry-title</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*digg.com*</string>
+				<key>query</key>
+				<string>div.main h3 a</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*mixx.com*</string>
+				<key>query</key>
+				<string>h4.entry-title a[target="_blank"]</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*mahalo.com/Category:*</string>
+				<key>query</key>
+				<string>div.featured ul li a</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*mahalo.com/*</string>
+				<key>query</key>
+				<string>ul li a</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*wikipedia.org*</string>
+				<key>query</key>
+				<string>#bodyContent p a</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*reddit.com*</string>
+				<key>query</key>
+				<string>#siteTable a.title</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://news.ycombinator.com/*</string>
+				<key>query</key>
+				<string>td.title a</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*search.yahoo.com/search*</string>
+				<key>query</key>
+				<string>a.yschttl</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*.ask.com/web?q=*</string>
+				<key>query</key>
+				<string>#teoma-results div a.L4</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://search.live.com/results.aspx?q=*</string>
+				<key>query</key>
+				<string>#results h3 a</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*facebook.com/home.php*</string>
+				<key>query</key>
+				<string>#home_main a</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*flickr.com/*</string>
+				<key>query</key>
+				<string>img.pc_img</string>
+			</dict>
+			<dict>
+				<key>URLPattern</key>
+				<string>http://*natuba.com/*</string>
+				<key>query</key>
+				<string>div.image a img</string>
+			</dict>
+		</array>
+    </dict>
+</plist>

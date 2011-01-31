@@ -1,0 +1,7 @@
+
+<UserScriptConfig>
+    <Script name="Grooveshark Desktop" namespace="http://fluidapp.com" description="The unofficial Grooveshark desktop client, built withg Fluid. Features dock control, badges for social notifications, premium mode, and Growl notifications." filename="GroovesharkDesktop.user.js">
+        <Include>http://listen.grooveshark.com/*</Include>
+        <Application>com.fluidapp.FluidInstance.Grooveshark</Application>
+    </Script>
+</UserScriptConfig>

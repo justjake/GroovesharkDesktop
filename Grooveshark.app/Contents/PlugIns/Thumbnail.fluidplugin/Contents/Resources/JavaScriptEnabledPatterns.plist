@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   Config.plist
+   ThumbnailPlugIn
+
+   Created by Todd Ditchendorf on 3/23/08.
+   Copyright 2008 Todd Ditchendorf. All rights reserved.
+-->
+<plist version="1.0">
+    <array>
+		<string>http://*.muxtape.com*</string>
+	</array>
+</plist>

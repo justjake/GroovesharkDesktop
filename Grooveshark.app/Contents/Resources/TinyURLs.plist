@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+   SpecialCases.plist
+   FluidInstance
+
+   Created by Todd Ditchendorf on 4/7/08.
+   Copyright 2008 Todd Ditchendorf. All rights reserved.
+-->
+<plist version="1.0">
+<array>
+	<string>tinyurl.com</string>
+	<string>is.gd</string>
+	<string>bit.ly</string>
+	<string>tr.im</string>
+	<string>moourl.com</string>
+	<string>xrl.us</string>
+	<string>s3nt.com</string>
+	<string>twurl.nl</string>
+	<string>ping.fm</string>
+	<string>rubyurl.com</string>
+	<string>peaurl.com</string>
+	<string>urltea.com</string>
+	<string>snipurl.com</string>
+	<string>rurl.org</string>
+	<string>dwarfurl.com</string>
+	<string>kurl.nl</string>
+	<string>tinypic.com</string>
+	<string>shorl.com</string>
+	<string>digbig.com</string>
+	<string>snurl.com</string>
+	<string>shurl.net</string>
+	<string>doiop.com</string>
+	<string>shorttext.com</string>
+	<string>301url.com</string>
+</array>
+</plist>

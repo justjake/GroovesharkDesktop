@@ -1,0 +1,13 @@
+// ==UserScript==
+// @name        %@
+// @namespace   http://fluidapp.com
+// @description What does this do?
+// @include     *
+// @author      Someone
+// ==/UserScript==
+
+(function () {
+    if (window.fluid) {
+		// do yer thang!
+    }
+})();
