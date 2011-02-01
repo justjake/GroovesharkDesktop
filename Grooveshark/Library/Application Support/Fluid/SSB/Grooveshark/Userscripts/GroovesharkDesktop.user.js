@@ -11,9 +11,6 @@
 1. JSON loading of miniController themes
     * how do I handle CSS and unsafe scripts?
     * eval() !?!?!?
-2. Add giant all expansive child to #header when its being dragged to capture
-the mouse whenever its still in the window -- no more selecting bullshit
-remove that glassCieling on mouseUp
 */
 
 console.log("writing deepCopy");
@@ -44,6 +41,7 @@ mediaKeysPlugin = {};
 console.log("writing gsFluid");
 
 gsFluid = {			// global object
+		version: 0.04,
 		// hasInitiated: false,
 		player: {		// pause play prev next
 			isPlaying: function() {
@@ -468,7 +466,7 @@ gsFluid = {			// global object
 					var p = gsFluid.theme.current.progress;
 					u = (p.max - p.min) * Math.min(1, stat.position / stat.duration) + p.min;
 					u = isNaN(u) ? 0 : u;
-					console.log('Progress', u);
+					// console.log('Progress', u);
 					$('#microController '+p.selector).css(p.property, u+p.units);
 				}
 			},
@@ -517,6 +515,9 @@ gsFluid = {			// global object
 		},
 		
 		init: function() {
+			console.log('Initializing gsFluid, the unofficial Grooveshark Desktop client');
+			console.log('(c) 2011 Jake Teton-Landis <just.1.jake@gmail.com>');
+			console.log('version:', gsFluid.version);
 			console.log("Initializing gsFluid.nativetheme");
 			gsFluid.nativetheme.init();
 			console.log("running gsFluid.enablePremium");
@@ -665,7 +666,7 @@ microControllerExample = {
 		height: 2px;\
 		/*border-top: 1px solid rgba(255,255,255,.8);\
 		border-bottom: 1px solid rgba(255,255,255,.8);*/\
-		border-right: 2px solid rgb(128,186,35);\
+		border-right: 2px solid rgb(158,240,55);\
 		width: 100%;\
 		background: #FFF;\
 	}\
@@ -741,7 +742,6 @@ console.log("Trying to fluid");
 
 (function () {
     if (window.fluid) {
-			console.log("Starting Grooveshark Desktop (FLUID)");
 			gsFluid.init();
 			gsFluid.theme.selected = microControllerExample;
     }
