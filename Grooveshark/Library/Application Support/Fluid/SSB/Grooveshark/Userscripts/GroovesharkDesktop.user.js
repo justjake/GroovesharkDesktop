@@ -249,9 +249,9 @@ gsFluid = {			// global object
 				// TODO: do this by drawing the traffic lights over the glass Ceiling
 				var  $glass = $('<div id="glassCeiling" />').css({
 					'position': 'absolute',
-					'left': '70px',
+					'left': 0,
 					// 'border-left': '1px solid red',
-					'top': 0,
+					'top': '39px',
 					'width': '5000px',
 					'height': '5000px',
 					'z-index': gsFluid.resources.glassIndex
