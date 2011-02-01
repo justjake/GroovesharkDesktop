@@ -6193,7 +6193,7 @@
       break ;
   }
   this.lastStatus = b.status;
-  $.publish("gs.player.playstatus", b);
+  $.publish("gs.player.playstatus", b); //@NOTE I can use this... maybe. The above clearly produces progress
 }
 ), pauseNextQueueSongID : false, pauseNextSong : (function ()
 {
@@ -6417,7 +6417,7 @@
       a.queue = null;
       a.player.stopSong();
       a.player.clearQueue();
-      a.playerStatus(a.player.getPlaybackStatus());
+      a.playerStatus(a.player.getPlaybackStatus()); //@IMPORTANT
       a.updateQueueWidth();
       a.gsQueue.setActive(0, false);
       a.gsQueue.setItems([]);
