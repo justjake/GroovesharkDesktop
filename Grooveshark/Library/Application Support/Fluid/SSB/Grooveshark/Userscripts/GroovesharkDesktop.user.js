@@ -310,12 +310,11 @@ gsFluid = {			// global object
 				// now uses css
 				$('head').append('<link rel="stylesheet" type="text/css" href="'+gsFluid.resources.r+gsFluid.resources.lights+'/lights.css" />');
 				
-				// close does nothing, disabled.
 					
-				// var close = lightProto.clone().addClass('closeButton').mouseup(function(){
-				// 		console.log('trying to terminate');
-				// 		window.fluid.terminate();
-				// 	}).appendTo($el);
+				var close = lightProto.clone().addClass('closeButton').mouseup(function(){
+						console.log('trying to terminate');
+						window.fluid.terminate();
+					}).appendTo($el);
 				
 				var minimize = lightProto.clone().addClass('minimizeButton').mouseup(function(){
 							console.log('trying to hide');
@@ -363,6 +362,7 @@ gsFluid = {			// global object
 					gsFluid.window.minimizedDimensions = {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop};
 					// hide everything
 					$('#mainContainer').hide();     
+					gsFluid.window.aboutToResize = true;
 					window.resizeTo(theme.width, theme.height); // should be big enough.   
 					$('head').append('<style id="microControllerCSS" type="text/css" media="screen">'+theme.css.replace(theme.resources, gsFluid.resources.r)+'</style>');
 					$('body').prepend(theme.html.replace(theme.resources, gsFluid.resources.r)).addClass('microControllerEnabled');
@@ -384,6 +384,7 @@ gsFluid = {			// global object
 					//window.moveTo($store.data('normalSize').x, $store.data('normalSize').y);
 					gsFluid.window.minimizedDimensions = false;
 				} else {
+					gsFluid.window.aboutToResize = true;
 					gsFluid.window.minimizedDimensions = {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop};
 					window.resizeTo(window.outerWidth, 109); // small, should show only the playbar and titlebar
 				}
@@ -394,6 +395,7 @@ gsFluid = {			// global object
 					window.moveTo(gsFluid.window.minimizedDimensions.x, gsFluid.window.minimizedDimensions.y);
 					gsFluid.window.minimizedDimensions = false;
 				} else {
+					gsFluid.window.aboutToResize = true;
 					gsFluid.window.minimizedDimensions = {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop};
 					window.resizeTo(5000,5000); // should be big enough.
 				}
@@ -444,7 +446,14 @@ gsFluid = {			// global object
 			console.log("Initializing gsFluid.window");
 			gsFluid.window.init();
 			// we aren't minimized/maximized after resizing the window
-			$(window).resize(function () { gsFluid.window.minimizedDimensions = false });
+			$(window).resize(function () { 
+				if (gsFluid.window.aboutToResize) {
+					gsFluid.window.aboutToResize = false;
+				} else {
+					gsFluid.window.minimizedDimensions = false;
+				}
+			});
+			//gsFluid.theme.current = microControllerExample;
 		}
 } // end gsFluid
 
