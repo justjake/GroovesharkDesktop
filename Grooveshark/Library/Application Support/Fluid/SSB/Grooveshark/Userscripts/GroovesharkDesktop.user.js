@@ -508,6 +508,7 @@ microControllerExample = {
 		clear: both\
 	}                    \
 	#microController .minimizeButton {\
+		margin-top: 6px;\
 		background: url("$resources/titlebar_larzon83_plus.png");\
 	} #microController .minimizeButton:hover {\
 		background: url("$resources/titlebar_larzon83_plus.png");\
