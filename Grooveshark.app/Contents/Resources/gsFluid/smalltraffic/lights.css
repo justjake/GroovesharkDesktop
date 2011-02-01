@@ -1,0 +1,46 @@
+/*
+	TRAFFIC LIGHTS CSS
+	for use with all themes
+*/
+
+.trafficLight {
+	display:	block;
+	float:		left;
+	margin-left: 9px;
+	margin-top:	13px;
+	width:		12px;
+	height:		13px;
+}
+
+
+.closeButton {
+	background-image: url("close_active.png");
+}                          
+.closeButton:hover {       
+	background-image: url("close_over.png");
+}                          
+.closeButton:active {      
+	background-image: url("close_down.png");
+}
+
+
+.minimizeButton {
+	background-image: url("min_active.png");
+}
+.minimizeButton:hover {
+	background-image: url("min_over.png");
+}
+.minimizeButton:active {
+	background-image: url("min_down.png");
+}
+
+
+.maximizeButton {
+	background-image: url("max_active.png");
+}
+.maximizeButton:hover {
+	background-image: url("max_over.png");
+}
+.maximizeButton:active {  
+	background-image: url("max_down.png");
+}

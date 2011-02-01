@@ -7,43 +7,14 @@
 // @author      Jake Teton-Landis <just.1.jake@gmail.com>
 // ==/UserScript==
 
-/* NOTES 
-As Grooveshark will change thier application code without notice, I'm 
-abstracting some important functionality, like player control, to provide a 
-stable API for possible remote authors, if I ever get themes off the ground.
-
-If you want to hack on this script, I'd reccomend downloading a copy of 
-Grooveshark's app.js file. You can use Opera 9.27 and 
-http://www.howtocreate.co.uk/tutorials/jsexamples/JSTidy.html to tidy up the 
-code.
-
-Unfortunately, core.js does not run in Opera 9.27 so that's too hard to deal 
-with.
-*/
-
-/* CHANGELOG
-Unversioned (29 January 2011)
-	initial release
-0.02
-	Window now chromeless
-	shrink and maximize added
-	removed dock control because all it does is crash
-*/
-
-/* KNOWN ISSUES
-0.02
-	Close button does nothing
-0.01
-	Dock control crashes Fluid
-	Multiple Growl notifications
-*/
-
 /* TODO
 1. minimize to miniController
 2. JSON loading of miniController themes
     * how do I handle CSS and unsafe scripts?
     * eval() !?!?!?
-3. 
+3. Add giant all expansive child to #header when its being dragged to capture
+the mouse whenever its still in the window -- no more selecting bullshit
+remove that glassCieling on mouseUp
 */
 
 console.log("writing deepCopy");
@@ -118,7 +89,7 @@ gsFluid = {			// global object
 				}
 			}, 	//end song
 		},	//end gsFluid.player
-		theme: {		// set current list showUI (showUI unimplemented)
+		nativetheme: {		// set current list showUI (showUI unimplemented)
 			init: function() {
 				// remap themeing function to prevent ad themes
 				eval("GS.theme._setCurrentTheme = "+GS.theme.setCurrentTheme.toString());
@@ -130,7 +101,7 @@ gsFluid = {			// global object
 				// make theme UI trusted
 				GS.Controllers.Lightbox.ThemesController.prototype["a.theme click"] = function(a) {
 					console.log("switch theme trusted (FROM UI)", a.attr("rel"));
-					gsFluid.theme.set(a.attr("rel"));
+					gsFluid.nativetheme.set(a.attr("rel"));
 					GS.guts.logEvent("themeChangePerformed", {theme : $(".title", a).text()});
 				};
 			},
@@ -150,7 +121,7 @@ gsFluid = {			// global object
 			showUI: function() {											//TODO!!!!!! // who cares
 				return false;
 			}
-		},	// end gsFluid.theme
+		},	// end gsFluid.nativetheme
 		dock: {
 			menu: { // the dock menu management system is cool, you should use it for your other Fluid Projects
 				_current: [],
@@ -164,6 +135,8 @@ gsFluid = {			// global object
 						} else { menu.push("Paused"); }
 						menu.push('  '+gsFluid.player.song().title);
 						menu.push('  '+gsFluid.player.song().artist);
+						 
+						// DOCK CONTROL
 						
 						// ALL THIS DOES IS CRASH FLUID:
 						
@@ -270,7 +243,20 @@ gsFluid = {			// global object
 				if ($el.data('isDraggable')) {
 					return false;
 				}
-				$el.data('isDraggable', true);
+				$el.data('isDraggable', true); 
+				// prevents mouse from leaving while dragging downwards  
+				// the left: 70px hack is to keep the traffic lights clickable.
+				// TODO: do this by drawing the traffic lights over the glass Ceiling
+				var  $glass = $('<div id="glassCeiling" />').css({
+					'position': 'absolute',
+					'left': '70px',
+					// 'border-left': '1px solid red',
+					'top': 0,
+					'width': '5000px',
+					'height': '5000px',
+					'z-index': gsFluid.resources.glassIndex
+				}).appendTo($el).hide();
+				
 
 				// Move the $el by the amount of change in the mouse position  
 				var move = function(event) {  
@@ -293,19 +279,21 @@ gsFluid = {			// global object
 						$el.data('mouseY', coords[1]);  
 						//console.log("window at ",window.screenLeft,window.screenTop);
 					}  
-				}  
+				};  
 
-				$el.mousedown(function(event) {  
+				$el.mousedown(function(event) {    
+					$glass.show();
 					//console.log('mouse down in ', $el, event);
-					$el.data('mouseMove', true);  
+					$el.data('mouseMove', true);             
 					var coords = gsFluid.window.absCoords( event.clientX, event.clientY);
 					$el.data('mouseX', coords[0]);  
 					$el.data('mouseY', coords[1]);  
 				});  
 
 				$el.parents(':last').mouseup(function() {  
-					//console.log('mouse up in ', $el, event);
-					$el.data('mouseMove', false);  
+					//console.log('mouse up in ', $el, event); 
+					$glass.hide();
+					$el.data('mouseMove', false); 
 				});  
 
 				$el.mouseout(move);  
@@ -315,109 +303,124 @@ gsFluid = {			// global object
 				console.log("This element now is a window draggable", $el);
 				return $el;
 			}, // end makeBar
-			drawTrafficLights: function( $el ) {
-				var lightProto = $('<a />').css({
-					'display':		"block", 
-					'float':		'left',
-					'margin-left':	'9px',
-					'margin-top':	'13px',
-					'width':		'12px',
-					'height':		'13px'
-				})
+			drawTrafficLights: function( $el ) {   
+				$el = $($el);
+				var lightProto = $('<a />').addClass('trafficLight');
 				
-				var close = lightProto.clone()
-					.css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "close_active.png')")
-					.hover(function(){ 
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "close_over.png')");
-						}, function (){
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "close_active.png')");
-						}).mousedown(function(){
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "close_down.png')");
-						}).mouseup(function(){
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "close_over.png')");
-							console.log('trying to terminate');
-							window.fluid.terminate();
-						})
-					.appendTo($el);
+				// now uses css
+				$('head').append('<link rel="stylesheet" type="text/css" href="'+gsFluid.resources.r+gsFluid.resources.lights+'/lights.css" />');
 				
-				var minimize = lightProto.clone()
-					.css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "min_active.png')")
-					.hover(function(){ 
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "min_over.png')");
-						}, function (){
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "min_active.png')");
-						}).mousedown(function(){
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "min_down.png')");
-						}).mouseup(function(){
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "min_over.png')");
+				// close does nothing, disabled.
+					
+				// var close = lightProto.clone().addClass('closeButton').mouseup(function(){
+				// 		console.log('trying to terminate');
+				// 		window.fluid.terminate();
+				// 	}).appendTo($el);
+				
+				var minimize = lightProto.clone().addClass('minimizeButton').mouseup(function(){
 							console.log('trying to hide');
 							window.fluid.hide();
 							
 							// we pass 'this' along for a place to save isMinimized and other data
-							gsFluid.window.toggleSmall( this );
+							//gsFluid.window.toggleSmall( this );
+							gsFluid.window.toggleMinimize();
 							
-						})
-					.appendTo($el);
+						}).appendTo($el);
 
-				var maximize = lightProto.clone()
-					.css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "max_active.png')")
-					.hover(function(){ 
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "max_over.png')");
-						}, function (){
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "max_active.png')");
-						}).mousedown(function(){
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "max_down.png')");
-						}).mouseup(function(){
-							$(this).css('background-image', "url('"+ gsFluid.resources.r + gsFluid.resources.lights + "max_over.png')");
+				var maximize = lightProto.clone().addClass('maximizeButton').mouseup(function(){
 							console.log('trying to maximize');
-							
-							gsFluid.window.toggleMaximize( this );
-							
-						})
-					.appendTo($el);
+							gsFluid.window.toggleMaximize();
+						}).appendTo($el);
 					
 				return $el;
-			}, // end gsFluid.window.drawTrafficLights
-			toggleSmall: function( store ) {
-				$store = $(this);
-				if ( $store.data('normalSize') ) {
-					window.resizeTo(window.outerWidth, $store.data('normalSize').h);
-					//window.moveTo($store.data('normalSize').x, $store.data('normalSize').y);
-					$store.data('normalSize', false);
+			}, // end gsFluid.window.drawTrafficLights 
+			
+			toggleMinimize: function() { // wrapper function. delicious abstraction
+				if ( gsFluid.theme.current ) {
+					gsFluid.window.toggleMinimizeToTheme( gsFluid.theme.current );
 				} else {
-					$store.data('normalSize', {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop} );
-					window.resizeTo(window.outerWidth,109); // should be big enough.
+					console.log("No microController theme selected");
+					gsFluid.window.toggleSmall();
 				}
-			},
-			toggleMaximize: function( store ) {
-				$store = $(this);
-				if ( $store.data('normalSize') ) {
-					window.resizeTo($store.data('normalSize').w, $store.data('normalSize').h);
-					window.moveTo($store.data('normalSize').x, $store.data('normalSize').y);
-					$store.data('normalSize', false);
+			}, // end toggleMinimize
+			
+			//MINTHEME 
+			toggleMinimizeToTheme: function ( theme ) {
+				gsFluid.window.theme = theme;
+				if ( gsFluid.window.minimizedDimensions ) {
+					// show everything      
+					$('#microController .minimizeButton').insertAfter( $('#header .closeButton') );
+					
+					$('#microControllerCSS').remove();
+					$('#microController').remove();
+					
+					$('#mainContainer').show();   
+					window.resizeTo(gsFluid.window.minimizedDimensions.w, gsFluid.window.minimizedDimensions.h);
+					//window.moveTo($store.data('normalSize').x, $store.data('normalSize').y);
+					gsFluid.window.minimizedDimensions = false;    
+					    
 				} else {
-					$store.data('normalSize', {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop} );
+					gsFluid.window.minimizedDimensions = {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop};
+					// hide everything
+					$('#mainContainer').hide();     
+					window.resizeTo(theme.width, theme.height); // should be big enough.   
+					$('head').append('<style id="microControllerCSS" type="text/css" media="screen">'+theme.css.replace(theme.resources, gsFluid.resources.r)+'</style>');
+					$('body').prepend(theme.html.replace(theme.resources, gsFluid.resources.r)).addClass('microControllerEnabled');
+					$('html').css('background', 'transparent');
+					// $('body').css({
+					// 	'background': 'transparent',
+					// 	'width': theme.width+'px',
+					// 	'height': theme.height+'px'
+					// });
+					gsFluid.window.makeBar( $('#microController '+theme.drag) );
+					$('#header .minimizeButton').appendTo($('#microController '+theme.drag));
+				}
+				
+				
+			}, //end toggleMinimizeToTheme
+			toggleSmall: function() {
+				if ( gsFluid.window.minimizedDimensions ) {
+					window.resizeTo(window.outerWidth, gsFluid.window.minimizedDimensions.h);
+					//window.moveTo($store.data('normalSize').x, $store.data('normalSize').y);
+					gsFluid.window.minimizedDimensions = false;
+				} else {
+					gsFluid.window.minimizedDimensions = {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop};
+					window.resizeTo(window.outerWidth, 109); // small, should show only the playbar and titlebar
+				}
+			},//end toggleSmall
+			toggleMaximize: function() {
+				if ( gsFluid.window.minimizedDimensions ) {
+					window.resizeTo(gsFluid.window.minimizedDimensions.w, gsFluid.window.minimizedDimensions.h);
+					window.moveTo(gsFluid.window.minimizedDimensions.x, gsFluid.window.minimizedDimensions.y);
+					gsFluid.window.minimizedDimensions = false;
+				} else {
+					gsFluid.window.minimizedDimensions = {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop};
 					window.resizeTo(5000,5000); // should be big enough.
 				}
-			},
+			},//end toggleMaximize
 			
 			init: function() {
-				// the window is now draggable by the header bar
+				// the window is now draggable by the header bar  
+				//traffic lights
+				gsFluid.window.drawTrafficLights( $('#header') );
+				
 				gsFluid.window.makeBar( $('#header') );
 				
 				// move header contents right so we can make some traffic lights
 				$('#grooveshark').css('left', 80);
 				$('#nav').css('left', 215);
 				
-				//traffic lights
-				gsFluid.window.drawTrafficLights( $('#header') );
 			}
 			
 		}, // end gsFluid.window
+		theme: {
+			current: false
+		},
 		
-		resources: {
+		resources: {  
+			glassIndex: 100000,
 			r: 'http://jake.teton-landis.org/projects/gsFluid/resources/',
-			lights: 'smalltraffic/'
+			lights: 'smalltraffic/' //'stijo'
 		}, // end gsFluid.resources
 		
 		enablePremium: function() {
@@ -427,8 +430,8 @@ gsFluid = {			// global object
 		
 		init: function() {
 			// gsFluid.resources = 'file:/' + window.fluid.resourcePath + 'gsFluid/';  // app path resources
-			console.log("Initializing gsFluid.theme");
-			gsFluid.theme.init();
+			console.log("Initializing gsFluid.nativetheme");
+			gsFluid.nativetheme.init();
 			console.log("running gsFluid.enablePremium");
 			gsFluid.enablePremium();
 			console.log("Initializing gsFluid.dock");
@@ -440,10 +443,12 @@ gsFluid = {			// global object
 			};	
 			console.log("Initializing gsFluid.window");
 			gsFluid.window.init();
+			// we aren't minimized/maximized after resizing the window
+			$(window).resize(function () { gsFluid.window.minimizedDimensions = false });
 		}
 } // end gsFluid
 
-/*
+
 microControllerExample = {
 	metadata: {
 		title:	"microController",
@@ -454,13 +459,156 @@ microControllerExample = {
 	},
 	usesCustomJS: false,	// allows you to supply custom javascript for your theme
 	customJS: null,			// note that if you use custom js, no controls will be
-	width: 	812,			// automatically created for you except the drag bar
-	height:	214,
-	html:	'
-	<div id="microController">
-		<!-- everthing goes inside div#microController -->
-	</div>
-	',						// these controls automatically bound to the supplied selectors
+	width: 	250,			// automatically created for you except the drag bar
+	height:	250,
+	resources: /\$resources\//g, //found and replaced in CSS and HTML with the resources path
+	html:	'\
+	<div id="microController">    \
+		<div class="coverart">\
+			<img src="$resources/themes/microController/album.jpg"  />\
+		</div>\
+\
+		<div class="dragbar"></div>         \
+		<div id="data">\
+			<div class="title">Caring is Creepy</div>\
+			<div class="album">Oh, Inverted World</div>\
+			<div class="artist">The Shins</div>\
+		</div>                \
+		<div id="progress"></div>\
+		<div id="controls">\
+			<a href="#nope" class="prev"></a>\
+			<a href="#nope" class="play"></a>\
+			<a href="#nope" class="next"></a>\
+		</div>	\
+	</div>\
+	',	 
+	css:'\
+	body.microControllerEnabled { \
+		min-width: 0; \
+		width: 250px; \
+		height: 250px; \
+		text-align: left; \
+		font-size: 13px;\
+	} \
+	#microController {   \
+		position: absolute;\
+		width: 250px;\
+		height: 250px;\
+		background: #222;\
+		z-index: 99999999;\
+		clear: both\
+	}                    \
+	#microController .minimizeButton {\
+		background: url("$resources/titlebar_larzon83_plus.png");\
+	} #microController .minimizeButton:hover {\
+		background: url("$resources/titlebar_larzon83_plus.png");\
+	} #microController .minimizeButton:active {\
+		background: url("$resources/titlebar_larzon83_plus.png");\
+	}\
+	              \
+	#microController .dragbar {  \
+		position: absolute;   \
+		top: 0;    \
+		left: 0;\
+		right: 0;\
+		z-index: 400;\
+		height: 22px;     \
+		background: rgba(50,50,50,.1);\
+	}\
+	                     \
+	#microController .coverart {\
+		background: blue;\
+		width: 250px;\
+		height: 250px; \
+		position: absolute;      \
+		top: 0;\
+	}\
+	  \
+	#microController .coverart img {\
+		width: 100%;\
+		height: 100%;\
+	}                      \
+	\
+	#microController #data {      \
+		border-top: 1px solid rgba(30,30,30,.5);     \
+		border-bottom: 1px solid rgba(30,30,30,.5);   \
+		background: rgba(30,30,30,.5);\
+		        \
+		left: 0;\
+		right: 0;         \
+		top: 158px;     \
+		bottom: 51px;\
+		padding-top: 3px;\
+		\
+		text-align: center;     \
+		color: rgba(255, 255, 255, .92);   \
+		text-shadow: 0px 0px 3px rgba(0,0,0,.8);\
+		font-size: 13px;   \
+		line-height: 1.4em;\
+		font-family: "Helvetica Neue", Helvetica, Sans-serif;\
+		position: absolute;                                  \
+	}        \
+	\
+	#microController #data * {\
+		text-align: center;\
+		line-height: 1.4em\
+	}\
+	\
+	#microController #data .album {\
+		display: none;\
+	}\
+	\
+	#microController #progress {    \
+		position: absolute;\
+		top: 199px;\
+		height: 1px;\
+		width: 30%;\
+		background: #FFF;\
+	}\
+	\
+	\
+	#microController #controls {\
+		border-top: 1px solid rgba(30,30,30,.5);     \
+		border-bottom: 1px solid rgba(30,30,30,.5);   \
+		background: rgba(30,30,30,.5);\
+		\
+		position: absolute;\
+		top: 200px;    \
+		height: 36px;\
+		left:0;\
+		right: 0;  \
+		padding-left: 37px;   \
+		padding-top: 12px;  \
+	}               \
+	\
+	#microController #controls * {    /*125px wide together, including middle spacing*/\
+		display: block;\
+		width: 25px;\
+		height:	25px;\
+		float: left;  \
+		margin-left: 25px;  \
+	}   \
+	\
+	#microController .prev {\
+		background: url($resources/themes/microController/fc_skip_left.png) no-repeat center;\
+	} #microController .prev:active { \
+		background: url($resources/themes/microController/fc_skip_left_on.png) no-repeat center;\
+	}    \
+	\
+	#microController .next {\
+		background: url($resources/themes/microController/fc_skip_right.png) no-repeat center;\
+	} #microController .next:active {                            \
+		background: url($resources/themes/microController/fc_skip_right_on.png) no-repeat center;\
+	}     \
+	\
+	#microController #controls .play {      \
+		margin-top: -2px;\
+		height: 30px;\
+		background: url($resources/themes/microController/fc_play.png) no-repeat center;\
+	} #microController  #controls .play:active {                       \
+		background: url($resources/themes/microController/fc_play_on.png) no-repeat center;\
+	}    \
+	',   				// these controls automatically bound to the supplied selectors\
 	drag:	'.dragbar',
 	pause:	'.pause',
 	play:	'.play',
@@ -469,7 +617,7 @@ microControllerExample = {
 	art:	'.coverart',
 	song:	{title: '.title', artist: '.artistName', album: '.albumName'}
 }
-*/
+
 
 console.log("Trying to fluid");
 
