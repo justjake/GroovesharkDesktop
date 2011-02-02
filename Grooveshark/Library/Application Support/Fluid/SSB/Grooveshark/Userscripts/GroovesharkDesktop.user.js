@@ -13,8 +13,25 @@
     * eval() !?!?!?
 */
 
-console.log("writing deepCopy");
+console.log("writing functions");
 
+// test get request
+// testGet('http://jake.teton-landis.org/projects/gsFluid/resources/themes.js');
+var get = function(url) { // syncronous gets
+	var req = new XMLHttpRequest();
+	req.open('GET', url, false);
+	req.send(null);
+	return req;
+}
+
+// extend Object
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
 function deepCopy(obj) {
     if (Object.prototype.toString.call(obj) === '[object Array]') {
         var out = [], i = 0, len = obj.length;
@@ -362,10 +379,14 @@ gsFluid = {			// global object
 					gsFluid.window.aboutToResize = true;
 					window.resizeTo(theme.width, theme.height);
 					
-					gsFluid.theme.apply( theme );
+					// make sure theme works before commiting
+					if ( !gsFluid.theme.apply( theme ) ){
+						gsFluid.window.toggleMinimizeToTheme();
+						return false;
+					}
 					
 					//TODO: find a new place for the following
-					$('#header .minimizeButton').appendTo($('#microController '+'#controls'));
+					$('#header .minimizeButton').appendTo($('#microController '+theme.minimizeButtonDestination));
 				}
 				
 				
@@ -403,17 +424,122 @@ gsFluid = {			// global object
 				$('#grooveshark').css('left', 80);
 				$('#nav').css('left', 215);
 				
-			}
+				// manage handling previous sizing with minify/maximize
+				$(window).resize(function () {  //TODO : make this neater with recognizing when to make false;
+					if (!gsFluid.theme.active) {
+						if (gsFluid.window.aboutToResize) {
+							gsFluid.window.aboutToResize = false;
+						} else {
+							gsFluid.window.minimizedDimensions = false;
+						}
+					} else {
+						return false;
+					}
+				});	
+			} // end init
 		}, // end gsFluid.window
 		
 		// @THEME
 		theme: {
-			current: false,
-			active: false,
+			current:	false,
+			active:		false,
+			repo:		false,	// stores theme data downloaded from gsFluid.resources.r/themes/list.json,
+								// or the theme itself after it is downloaded
+			get: function( themeRef ) { // themeRefs are the info stubs in repositories
+				if ( gsFluid.theme.validateRef(themeRef) ){
+					var theme;
+					// load base theme.js file
+					var req = get(gsFluid.theme.repo.path + themeRef.shortname + '/theme.js');
+					// themes aren't strict JSON yet so we can't use this
+					// theme = JSON.parse(req.responseText);
+					// instead, eval()
+					eval('theme = ' + req.responseText);
+					
+					// get HTML, make replacements, attatch to theme
+					req = get(gsFluid.theme.repo.path + themeRef.shortname + '/theme.html');
+					theme.html = req.responseText.replace(theme.resources, gsFluid.theme.repo.path + themeRef.shortname);
 
-			apply: function( theme ){
+					// get CSS, make replacements, attatch to theme
+					req = get(gsFluid.theme.repo.path + themeRef.shortname + '/theme.css');
+					theme.css = req.responseText.replace(theme.resources, gsFluid.theme.repo.path + themeRef.shortname);
+
+					// get custom JS, if we use it
+					if (theme.customJS) {
+						req = get(gsFluid.theme.repo.path + themeRef.shortname + '/custom.js');
+						theme.customJS = req.responseText;
+					}
+					// validate
+					if ( gsFluid.theme.validate(theme) ){
+						gsFluid.theme.repo.themes[themeRef.shortname] = theme;
+						return theme;
+					} else {
+						console.log("Bad theme", theme);
+						return false;
+					}
+				} else {
+					console.log("Bad themeRef", themeRef);
+					return false;
+				}
+			},
+			getRepo: function( url ){
+				if (!url) {
+					console.log("No URL");
+					return false;
+				}
+				console.log("Attempting to retrieve theme repo at", url);
+				
+				$.ajax({
+					url:		url,
+					global:		false, // don't want to mess with Grooveshark
+					cache: 		false,
+					dataType: 	"json", 
+					success:	function( data, textStatus, req ) {
+						// console.log("SUCCESS", data, textStatus);
+						if (typeof data === 'object' && data.path && data.name && (Object.size(data.themes) > 0) ) {
+							// if everything is ok, then...
+							gsFluid.theme.repo = data;
+							return true;
+						} else {
+							console.log("invalid theme repo");
+							return false;
+						}
+					} 
+				});
+				
+			},
+			validate: function( theme ) {
+				if ( 
+					(theme.html.length > 0) && 
+					(theme.css.length > 0) && 
+					theme.width && 
+					theme.height && 
+					theme.metadata && 
+					(theme.metadata.gsFluidMinVersion <= gsFluid.version) &&
+					minimizeButtonDestination &&
+					theme.resources 
+				) {
+					return true;
+				}
+				if (theme.metadata.gsFluidMinVersion > gsFluid.version) {
+					console.log("This theme is too new for your version of Grooveshark Desktop", theme);
+					return false;
+				}
+				console.log("theme", theme, "failed validation");
+				return false;
+			},
+			validateRef: function( themeRef ){
+				if (
+					(themeRef.fullname.length > 0) &&
+					(themeRef.shortname.length > 0)
+				) {
+					return true;
+				}
+				console.log("themeRef", themeRef, "failed validation");	
+				return false;
+			},
+			apply: function( theme ){ //TODO: rewrite without replace() to match new theme format
 				// validate theme
-				if (theme.html && theme.css && theme.width && theme.height && theme.metadata && theme.resources) {
+				if ( gsFluid.theme.validate(theme) ) {
 					// Hide everything
 					//$('#mainContainer').hide();
 					$('#mainContainer').css({
@@ -457,10 +583,11 @@ gsFluid = {			// global object
 					}
 				} else {
 					console.log("Invalid theme", theme);
+					return false;
 				}
 			}, // end applyTheme
 			updateProgress: function() { 
-				// PRIVATE API ACCESS
+				// PRIVATE API ACCESS // REFACTOR INTO gsFluid.player.progress
 				var stat = GS.player.getPlaybackStatus();
 				if ( stat ) {
 					var p = gsFluid.theme.current.progress;
@@ -484,7 +611,7 @@ gsFluid = {			// global object
 				$('#microController '+theme.song.album).text( song.album );
 			
 				
-			}, //end updateTheme
+			}, //end update
 			remove: function() {
 				// remove progressbar updater
 				clearInterval( gsFluid.theme.progressInterval );
@@ -496,17 +623,21 @@ gsFluid = {			// global object
 					'visibility': 'visible'
 				});   
 				gsFluid.theme.active = false;
-			}
+			}, // end remove
+			init: function() {
+				gsFluid.theme.getRepo( gsFluid.resources.r+'themes.js' );
+			} // end init
 			
 			
 			
 			
 		}, //end gsFluid.theme
 		
-		resources: {  
-			glassIndex: 100000,
+		resources: {  //SETTINGS
+			glassIndex: -2,
 			r: 'http://jake.teton-landis.org/projects/gsFluid/resources/',
-			lights: 'smalltraffic/' //'stijo'
+		//	repo: 'themes.js',
+			lights: 'smalltraffic/'
 		}, // end gsFluid.resources
 		
 		enablePremium: function() {
@@ -518,231 +649,33 @@ gsFluid = {			// global object
 			console.log('Initializing gsFluid, the unofficial Grooveshark Desktop client');
 			console.log('(c) 2011 Jake Teton-Landis <just.1.jake@gmail.com>');
 			console.log('version:', gsFluid.version);
+			
 			console.log("Initializing gsFluid.nativetheme");
 			gsFluid.nativetheme.init();
+			
 			console.log("running gsFluid.enablePremium");
 			gsFluid.enablePremium();
+			
 			console.log("Initializing gsFluid.dock");
 			gsFluid.dock.init();
+			
 			mediaKeysPlugin = { // In my ideal world this works for apple remote too
 				forward: gsFluid.player.next,
 				backward: gsFluid.player.prev,
 				play: gsFluid.player.togglePlay
 			};	
+			
 			console.log("Initializing gsFluid.window");
 			gsFluid.window.init();
-			// we aren't minimized/maximized after resizing the window
-			$(window).resize(function () {  //TODO : make this neater with recognizing when to make false;
-				if (!gsFluid.theme.active) {
-					if (gsFluid.window.aboutToResize) {
-						gsFluid.window.aboutToResize = false;
-					} else {
-						gsFluid.window.minimizedDimensions = false;
-					}
-				} else {
-					return false;
-				}
-			});
-			//gsFluid.theme.current = microControllerExample;
+			
+			console.log("Initializing gsFluid.theme");
+			gsFluid.theme.init();
 		}
 }; // end gsFluid
 
-
-microControllerExample = {
-	metadata: {
-		title:	"microController",
-		author:	"Jake Teton-Landis",
-		email:	"just.1.jake@gmail.com", 
-		url:	"http://jake.teton-landis.org",
-		img:	null
-	},
-	// usesCustomJS: false,	// allows you to supply custom javascript for your theme
-	customJS: false,			// note that if you use custom js, no controls will be
-	width: 	250,			// automatically created for you except the drag bar
-	height:	250,
-	resources: /\$resources\//g, //found and replaced in CSS and HTML with the resources path
-	html:	' \
-	<div id="microController">    \
-		<div class="coverart">\
-			<img src="$resources/themes/microController/album.jpg"  />\
-		</div>\
-\
-		<!--<div class="dragbar"></div>-->\
-\
-		<div id="progress"></div>\
-		<div id="data">\
-			<div class="title">Caring is Creepy</div>\
-			<div class="album">Oh, Inverted World</div>\
-			<div class="artist">The Shins</div>\
-		</div>                \
-		<div id="controls">\
-			<a href="/#/" class="prev"></a>\
-			<a href="/#/" class="play"></a>\
-			<a href="/#/" class="next"></a>\
-		</div>	\
-	</div>\
-	',
-	css:'\
-	body.microControllerEnabled { \
-		min-width: 0; \
-		width: 250px; \
-		height: 250px; \
-		text-align: left; \
-		font-size: 13px;\
-	} \
-	#microController {   \
-		position: absolute;\
-		width: 250px;\
-		height: 250px;\
-		background: #222;\
-		z-index: 99999999;\
-		clear: both\
-	}                    \
-	#microController #controls .minimizeButton {\
-		margin-top: 0;\
-		margin-left: 18px;\
-		background: url("$resources/themes/microController/fc_expand.png") no-repeat center;\
-	} #microController .minimizeButton:hover {\
-		background: url("$resources/themes/microController/fc_expand.png") no-repeat center;\
-	} #microController .minimizeButton:active {\
-		background: url("$resources/themes/microController/fc_expand_on.png") no-repeat center;\
-	}\
-	              \
-	#microController .dragbar {  \
-		position: absolute;   \
-		top: 0;    \
-		left: 0;\
-		right: 0;\
-		z-index: 400;\
-		height: 22px;     \
-		background: rgba(50,50,50,.1);\
-	}\
-	                     \
-	#microController .coverart {\
-		background: blue;\
-		width: 250px;\
-		height: 250px; \
-		position: absolute;      \
-		top: 0;\
-	}\
-	  \
-	#microController .coverart img {\
-		width: 100%;\
-		height: 100%;\
-	}                      \
-	\
-	#microController #data {      \
-		border-top: 1px solid rgba(30,30,30,.5);     \
-		border-bottom: 1px solid rgba(30,30,30,.5);   \
-		background: rgba(30,30,30,.5);\
-		        \
-		left: 0;\
-		right: 0;         \
-		top: 158px;     \
-		bottom: 52px;\
-		padding-top: 3px;\
-		\
-		text-align: center;     \
-		color: rgba(255, 255, 255, .92);   \
-		text-shadow: 0px 0px 3px rgba(0,0,0,.8);\
-		font-size: 13px;   \
-		line-height: 1.4em;\
-		font-family: "Helvetica Neue", Helvetica, Sans-serif;\
-		position: absolute;                                  \
-	}        \
-	\
-	#microController #data * {\
-		text-align: center;\
-		line-height: 1.4em\
-	}\
-	\
-	#microController #data .album {\
-		display: none;\
-	}\
-	\
-	#microController #progress {    \
-		position: absolute;\
-		top: 198px;\
-		height: 2px;\
-		/*border-top: 1px solid rgba(255,255,255,.8);\
-		border-bottom: 1px solid rgba(255,255,255,.8);*/\
-		border-right: 2px solid rgb(158,240,55);\
-		width: 100%;\
-		background: #FFF;\
-	}\
-	\
-	\
-	#microController #controls {\
-		border-top: 1px solid rgba(30,30,30,.5);     \
-		border-bottom: 1px solid rgba(30,30,30,.5);   \
-		background: rgba(30,30,30,.5);\
-		\
-		position: absolute;\
-		top: 200px;    \
-		height: 36px;\
-		left:0;\
-		right: 0;  \
-		padding-left: 37px;   \
-		padding-top: 12px;  \
-	}               \
-	\
-	#microController #controls * {    /*125px wide together, including middle spacing*/\
-		display: block;\
-		width: 25px;\
-		height:	25px;\
-		float: left;  \
-		margin-left: 25px;  \
-	}   \
-	\
-	#microController .prev {\
-		background: url($resources/themes/microController/fc_skip_left.png) no-repeat center;\
-	} #microController .prev:active { \
-		background: url($resources/themes/microController/fc_skip_left_on.png) no-repeat center;\
-	}    \
-	\
-	#microController .next {\
-		background: url($resources/themes/microController/fc_skip_right.png) no-repeat center;\
-	} #microController .next:active {                            \
-		background: url($resources/themes/microController/fc_skip_right_on.png) no-repeat center;\
-	}     \
-	\
-	#microController #controls .play {      \
-		margin-top: -2px;\
-		height: 30px;\
-		background: url($resources/themes/microController/fc_play.png) no-repeat center;\
-	} #microController  #controls .play:active {                       \
-		background: url($resources/themes/microController/fc_play_on.png) no-repeat center;\
-	}    \
-	#microController #controls .pause.pause {\
-		background-image: url($resources/themes/microController/fc_pause.png) !important;\
-	} \
-	#microController #controls .play.pause:active {\
-		background-image: url($resources/themes/microController/fc_pause_on.png) !important;\
-	}\
-	',   				// these controls automatically bound to the supplied selectors\
-	drag:	'.coverart',
-	pause:	'pause',
-	play:	'.play',
-	next:	'.next',
-	prev:	'.prev',
-	art:	'.coverart',
-	progress: {
-		selector: 	'#progress',
-		property: 	'width',
-		units: 		'%',
-		min: 		0,
-		max: 		100
-	},
-	noartfile: '$resources/themes/microController/NoAlbumArt.png',
-	song:	{title: '.title', artist: '.artist', album: '.album'}
-}
-
-
-console.log("Trying to fluid");
-
+// This script is currently for Fluid.app SSBs only
 (function () {
     if (window.fluid) {
 			gsFluid.init();
-			gsFluid.theme.selected = microControllerExample;
     }
 })();
