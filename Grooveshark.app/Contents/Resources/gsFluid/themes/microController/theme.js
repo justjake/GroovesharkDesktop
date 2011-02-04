@@ -44,6 +44,7 @@ minimizeButtonDestination: '#controls',	// selector where we put the minimize to
 		// (max - min) * ( songPosition / songDuration ) + min + units 
 		// example comutation: (100 - 0) * (72585.57823129251 / 301662.0408163265) + 0 + '%' yields a percentage width
 	},
+	//TODO: this path just changed, theme will be wierd
 	noartfile: 'NoAlbumArt.png',  // file to use if there is no cover art
 	song:	{title: '.title', artist: '.artist', album: '.album'}	// selectors to update with current song info. Be specific, this is .text(valiue) replacement
 }

@@ -676,6 +676,7 @@ gsFluid = {			// global object
 // This script is currently for Fluid.app SSBs only
 (function () {
     if (window.fluid) {
+			gsFluid.isFluidInstance = true;
 			gsFluid.init();
     }
 })();

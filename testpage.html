@@ -14,112 +14,47 @@
 			background-color: #ccccff;
 		}    
 		
-		#microController {   
-			position: absolute;
-			width: 250px;
-			height: 250px;
-			background: #222;
-		}                    
-		              
-		#microController .dragbar {  
-			position: absolute;   
-			top: 0;    
-			left: 0;
-			right: 0;
-			z-index: 400;
-			height: 22px;     
-			background: rgba(50,50,50,.1);
-		}
-		                     
-		#microController .coverart {
-			background: blue;
-			width: 250px;
-			height: 250px; 
-			position: absolute;      
-			top: 0;
-		}
-		  
-		#microController .coverart img {
-			width: 100%;
-			height: 100%;
-		}                      
 		
-		#microController #data {      
-			border-top: 1px solid rgba(30,30,30,.5);     
-			border-bottom: 1px solid rgba(30,30,30,.5);   
-			background: rgba(30,30,30,.5);
-			        
-			left: 0;
-			right: 0;         
-			top: 158px;     
+		/* Scrollbars */
+		#bar {
+			max-width: 650px;
+			max-height: 500px;
+			overflow: auto;
+			background: #eee;
+		}
+		
+		::-webkit-scrollbar {
+			width: 10px;
+			height: 10px;
 			
-			padding-top: 3px;
-			
-			text-align: center;     
-			color: rgba(255, 255, 255, .92);   
-			text-shadow: 0px 0px 3px rgba(0,0,0,.6);
-			font-size: 13px;   
-			line-height: 1.4em;
-			font-family: "Helvetica Neue", Helvetica, Sans-serif;
-			position: absolute;                                  
-		}        
-		
-		#microController #data .album {
-			display: none;
 		}
 		
-		#microController #progress {    
-			position: absolute;
-			top: 199px;
-			height: 1px;
-			width: 30%;
-			background: #FFF;
+		*::-webkit-scrollbar-thumb {
+			background: rgba(71,71,71,.1);
+			border-radius: 12px;
+			margin: 3px;
+			
+		}
+		
+		*::-webkit-scrollbar-track {
+			background: rgba(71,71,71,.05);
+			border-radius: 10px;
+			margin: 3px;
+		}
+			
+			*:hover::-webkit-scrollbar-thumb {
+				background: rgba(71,71,71,.25);
+			}
+
+			*:hover::-webkit-scrollbar-track {
+				background: rgba(71,71,71,.1);
+			}
+
+		/* vertical */
+		::-webkit-scrollbar:vertical {
 		}
 		
 		
-		#microController #controls {
-			border-top: 1px solid rgba(30,30,30,.5);     
-			border-bottom: 1px solid rgba(30,30,30,.5);   
-			background: rgba(30,30,30,.5);
-			
-			position: absolute;
-			top: 200px;    
-			height: 36px;
-			left:0;
-			right: 0;  
-			padding-left: 37px;   
-			padding-top: 12px;  
-		}               
-		
-		#microController #controls * {    /*125px wide together, including middle spacing*/
-			display: block;
-			width: 25px;
-			height:	25px;
-			float: left;  
-			margin-left: 25px;  
-		}   
-		
-		#microController .prev {
-			background: url(resources/themes/microController/fc_skip_left.png) no-repeat center;
-		} #microController .prev:active { 
-			background: url(resources/themes/microController/fc_skip_left_on.png) no-repeat center;
-		}    
-		
-		#microController .next {
-			background: url(resources/themes/microController/fc_skip_right.png) no-repeat center;
-		} #microController .next:active {                            
-			background: url(resources/themes/microController/fc_skip_right_on.png) no-repeat center;
-		}     
-		
-		#microController #controls .play {      
-			margin-top: -2px;
-			height: 30px;
-			background: url(resources/themes/microController/fc_play.png) no-repeat center;
-		} #microController  #controls .play:active {                       
-			background: url(resources/themes/microController/fc_play_on.png) no-repeat center;
-		}    
-		
-		           
 		
 	</style>
 </head>
@@ -128,23 +63,44 @@
 
 <div id="blue"> This is the blue div </div>
         
-<div id="microController">    
-	<div class="coverart">
-		<img src="resources/themes/microController/album.jpg"  />
-	</div>
+
+<div id="bar">
+	<h2>Scrollbar Tester</h2>
+	<p>
+	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	</p>
+	<p>
+	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	</p>
+	<p>
+	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	</p>
+	<p>
+	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	</p>
 	
-	<div class="dragbar"></div>         
-	<div id="data">
-		<div class="title">Caring is Creepy</div>
-		<div class="album">Oh, Inverted World</div>
-		<div class="artist">The Shins</div>
-	</div>                
-	<div id="progress"></div>
-	<div id="controls">
-		<a href="" class="prev"></a>
-		<a href="" class="play"></a>
-		<a href="" class="next"></a>
-	</div>	
+	<p>
+	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	</p>
+	
+	<p>
+	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	</p>
+	
+	<p>
+	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	</p>
+	<p>
+	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	</p>
+	<p>
+	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	</p>
+	<p>
+	Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+	</p>
+	
+	
 </div>
 
 </body>

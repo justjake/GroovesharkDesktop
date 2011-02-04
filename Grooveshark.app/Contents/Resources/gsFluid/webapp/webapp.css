@@ -1,0 +1,33 @@
+/*
+	webapp.css - userstyle
+	Grooveshark Desktop
+	
+	(c) 2011 Jake Teton-Landis
+*/
+
+::-webkit-scrollbar {
+	width: 10px;
+	height: 10px;
+	
+}
+
+*::-webkit-scrollbar-thumb {
+	background: rgba(71,71,71,.1);
+	border-radius: 12px;
+	margin: 3px;
+	
+}
+
+*::-webkit-scrollbar-track {
+	background: rgba(71,71,71,.05);
+	border-radius: 10px;
+	margin: 3px;
+}
+	
+	*:hover::-webkit-scrollbar-thumb {
+		background: rgba(71,71,71,.25);
+	}
+
+	*:hover::-webkit-scrollbar-track {
+		background: rgba(71,71,71,.1);
+	}
