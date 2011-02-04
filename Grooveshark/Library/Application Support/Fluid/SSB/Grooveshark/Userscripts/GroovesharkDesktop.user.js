@@ -106,6 +106,35 @@ gsFluid = {			// global object
 				}
 			}, 	//end song
 		},	//end gsFluid.player
+		css: {
+			load: function( url ) {
+				if ( 0 < url.length ) {
+					return $('<link rel="stylesheet" type="text/css" href="'+url+'">').appendTo('head');
+				}
+				console.log("Failed to load CSS", url);
+				return false;
+			},
+			preloadImg: function( url ) {
+				(new Image()).src = url;
+			},
+			init: function() {
+				gsFluid.css.load( gsFluid.resources.r + 'webapp/webapp.css');
+				// preload traffic lights
+				var lights = ["close_active.png",
+					"close_over.png",
+					"max_active.png",
+					"max_over.png",
+					"min_down.png",
+					"close_down.png",
+					"lights.css",
+					"max_down.png",
+					"min_active.png",
+					"min_over.png"];
+				for (var i = lights.length - 1; i >= 0; i--){
+					gsFluid.css.preloadImg( gsFluid.resources.r + gsFluid.resources.lights + lights[i] );
+				};
+			}
+		},
 		
 		nativetheme: {		// set current list showUI (showUI unimplemented)
 			init: function() {
@@ -272,7 +301,7 @@ gsFluid = {			// global object
 					'position': 'absolute',
 					'left': 0,
 					// 'border-left': '1px solid red',
-					'top': '39px',
+					'top': 0,
 					'width': '5000px',
 					'height': '5000px',
 					'z-index': gsFluid.resources.glassIndex
@@ -393,10 +422,22 @@ gsFluid = {			// global object
 			}, //end toggleMinimizeToTheme
 			toggleSmall: function() {
 				if ( gsFluid.window.minimizedDimensions ) {
+					
 					window.resizeTo(window.outerWidth, gsFluid.window.minimizedDimensions.h);
 					//window.moveTo($store.data('normalSize').x, $store.data('normalSize').y);
 					gsFluid.window.minimizedDimensions = false;
+					if (gsFluid.window.didHideQueue === true) {
+						$('#showQueue').click();
+						gsFluid.window.didHideQueue = null;
+					}
+					
 				} else {
+					// make sure queue is hidden
+					if ( $('#queue').css('display') !== 'none' ) {
+						gsFluid.window.didHideQueue = true;
+						$('#showQueue').click();
+					};
+					
 					gsFluid.window.aboutToResize = true;
 					gsFluid.window.minimizedDimensions = {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop};
 					window.resizeTo(window.outerWidth, 109); // small, should show only the playbar and titlebar
@@ -670,6 +711,9 @@ gsFluid = {			// global object
 			
 			console.log("Initializing gsFluid.theme");
 			gsFluid.theme.init();
+			
+			console.log("Initializing userstyle");
+			gsFluid.css.init();
 		}
 }; // end gsFluid
 
