@@ -440,11 +440,12 @@ gsFluid = {			// global object
 					
 					gsFluid.window.aboutToResize = true;
 					gsFluid.window.minimizedDimensions = {w: window.outerWidth, h: window.outerHeight, x: window.screenLeft, y: window.screenTop};
-					window.resizeTo(window.outerWidth, 109); // small, should show only the playbar and titlebar
+					window.resizeTo(window.outerWidth, 108); // small, should show only the playbar and titlebar
 				}
 			},//end toggleSmall
 			toggleMaximize: function() {
 				if ( gsFluid.window.minimizedDimensions ) {
+					gsFluid.window.aboutToResize = true;
 					window.resizeTo(gsFluid.window.minimizedDimensions.w, gsFluid.window.minimizedDimensions.h);
 					window.moveTo(gsFluid.window.minimizedDimensions.x, gsFluid.window.minimizedDimensions.y);
 					gsFluid.window.minimizedDimensions = false;
