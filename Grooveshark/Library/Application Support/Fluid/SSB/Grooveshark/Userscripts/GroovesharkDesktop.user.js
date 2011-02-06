@@ -8,9 +8,10 @@
 // ==/UserScript==
 
 /* TODO
-1. JSON loading of miniController themes
-    * how do I handle CSS and unsafe scripts?
-    * eval() !?!?!?
+make cursor a mouse pointer when dragging, its a text selector right now
+store/load prefs
+make sure load order is good
+make this shit cross-platform
 */
 
 console.log("writing functions");
@@ -56,11 +57,20 @@ console.log("writing mediaKeysPlugin");
 mediaKeysPlugin = {}; 
 
 console.log("writing gsFluid");
-
+/** @namespace */
 gsFluid = {			// global object
-		version: 0.04,
+		/** @constant */
+		version: 0.042,
 		// hasInitiated: false,
+		/** @namespace Contains functions for determining the state of Grooveshark */
 		player: {		// pause play prev next
+			lastSong: false,
+			lastState: false,
+			state: function() {
+				if (GS.player.isPlaying) return 1;
+				if (GS.player.isPaused)  return 2;
+				return 0;
+			},
 			isPlaying: function() {
 				return GS.player.isPlaying;
 			},
@@ -81,6 +91,17 @@ gsFluid = {			// global object
 				return GS.player.previousSong();
 			},
 			// Please use data from abstraction whenever possible
+			/**
+			Returns data on the currently playing song
+			song.title: 	The title of the song
+			song.album: 	The album of the song
+			song.artist: 	the song's artist
+			song.coverart: 	URL to coverart of song.
+			song.duration: 	Estimated length of the song.
+			song.id: 		Song's unique identification number
+			(If there is no song) song.none == true
+			@type SongObject
+			*/
 			song: function() {
 				console.log("retrieving song data");
 				if (GS.player.currentSong !== null) {
@@ -91,20 +112,67 @@ gsFluid = {			// global object
 						artist: GS.player.currentSong.ArtistName,
 						// return empty string if no cover art
 						coverart: (GS.player.currentSong.CoverArtFilename === null) ? "" : GS.player.currentSong.artPath+'m'+GS.player.currentSong.CoverArtFilename,
-						duration: Math.floor(GS.player.currentSong.EstimateDuration)/1000 //in seconds
+						duration: Math.floor(GS.player.currentSong.EstimateDuration)/1000, //in seconds
+						id: GS.player.currentSong.SongID 
 					};
 				} else {
 					console.log('No song playing');
 					return {
-						title: "Not Playing",
-						album: "",
-						artist: "",
-						coverart: "",
-						duration: 0,
-						none: true
+						title: 		"Not Playing",
+						album: 		"",
+						artist: 	"",
+						coverart: 	"",
+						duration: 	0,
+						id: 		null,
+						none: 		true
 					};
 				}
 			}, 	//end song
+			progress: function(){
+				var stat = GS.player.getPlaybackStatus();
+				if ( stat ) {
+					u = Math.min(1, stat.position / stat.duration);
+					return isNaN(u) ? 0 : u;
+				}
+				return false;
+			},
+			event: function() {
+				console.log("gsFluid.event")
+				var s = gsFluid.player.song(), state = gsFluid.player.state();
+				// store the last song
+				if ( !gsFluid.player.lastSong ) {
+					gsFluid.player.lastSong = s;
+				}
+				// store playstate
+				if (gsFluid.player.lastState === false) {
+					gsFluid.player.lastState = state;
+				}
+				
+				// player state
+				if (gsFluid.player.lastState !== state ) {
+					gsFluid.player.lastState = state;
+					console.log("gsFluid.playStateChanged");
+					$.publish("gsFluid.playStateChanged", state );
+				}
+				
+				// on album art change
+				if (gsFluid.player.lastSong.coverart !== s.coverart) {
+					console.log("gsFluid.artworkChanged");
+					$.publish("gsFluid.artworkChanged", s.coverart);
+				}
+				
+				// on track change
+				if ( gsFluid.player.lastSong.id !== s.id ) {
+					gsFluid.player.lastSong = s;
+					console.log("gsFluid.songChanged");
+					$.publish("gsFluid.songChanged", s );
+				}
+			},
+			init: function(){
+				$.subscribe('gs.player.playing', gsFluid.player.event);
+				$.subscribe('gs.player.paused', gsFluid.player.event);
+				$.subscribe('gs.player.stopped', gsFluid.player.event);
+			}
 		},	//end gsFluid.player
 		css: {
 			load: function( url ) {
@@ -135,39 +203,118 @@ gsFluid = {			// global object
 				};
 			}
 		},
-		
-		nativetheme: {		// set current list showUI (showUI unimplemented)
+		native: {
+			lightbox: {
+				open: function (a,b, gsFluidOrigin) { // FROM GROOVESHARK'S app.js CODE
+					var c = this.queue.indexOf(a), d = _.orEqual(this.priorities[a], 0);
+					b = _.orEqual(b, null);
+					var f = this;
+					if (this.curType === a) return false;
+					this.queuedOptions[a] = b;
+					if (d < this.currentPriority) this.queue.indexOf(a) === - 1 && this.queue.push(a);
+					else {
+						this.curType && this.queue.indexOf(this.curType) === - 1 && this.queue.push(this.curType);
+						if (! (this.queue.length && c !== - 1 && c > - 1)) {
+							this.curType = a;
+							this.currentPriority = d;
+							this.isOpen = true;
+							// what does this do???!?!??!?
+							if (!gsFluidOrigin) {
+								$("#lightbox_wrapper .lbcontainer." + a)[$.String.underscore("gs_lightbox_" + a)](b);
+							}
+							$("#lightbox .lbcontainer." + a).show(1, (function () {
+								f.positionLightbox();
+								$(this).find("form input:first:visible").focus();
+							} )).siblings().hide();
+							// if (!gsFluidOrigin) {
+								this.trackLightboxView(a);
+							// }
+							if ($("#lightbox_wrapper").is(":visible")) {
+								this.queue.indexOf(a) === - 1 && this.queue.unshift(a);
+							} else {
+								this.queue.indexOf(a) === - 1 && this.queue.push(a);
+							}
+							$("#theme_home .flash object").css("visibility", "hidden");
+							$("#lightbox_wrapper,#lightbox_overlay").show();
+							this.notCloseable.indexOf(this.curType) == - 1 ? $("#lightbox_close").show() : $("#lightbox_close").hide();
+						}
+					}
+				}, // end open
+				close: function ( gsFluidOrigin ) {
+					var a, b;
+					a = this.queue.shift();
+					if (_.defined(a)) {
+						$("#lightbox_wrapper .lbcontainer." + a).hide();
+						if ( !gsFluidOrigin ) {
+							a !== "login" && $("#lightbox_wrapper .lbcontainer." + a).empty().controller().destroy();
+						}
+					}
+					this.currentPriority = this.curType = false;
+					if (this.queue.length > 0) {
+						this.queue = this.sortQueueByPriority(this.queue);
+						a = this.queue.shift();
+						b = this.queuedOptions[a];
+						this.open(a, b);
+					} else {
+						this.isOpen = this.currentPriority = this.curType = false;
+						$("#lightbox_wrapper,#lightbox_overlay").hide();
+						$("#theme_home .flash object").css("visibility", "visible");
+					}
+				}, //end close
+				closeclick: function( a, b ) {
+					b.preventDefault();
+					console.log("lightbox close");
+					if ($("#lightbox_wrapper .lbcontainer.gsFluid").css('display') == "block") {
+						GS.lightbox.close(true);
+						gsFluid.lightbox.remove();
+					} else {
+						GS.lightbox.close();	
+					}		  
+				},
+				init: function() {
+					// replace functions
+					GS.lightbox.open = gsFluid.native.lightbox.open;
+					GS.lightbox.close = gsFluid.native.lightbox.close;
+					GS.Controllers.LightboxController.prototype[".close click"] = gsFluid.native.lightbox.closeclick;
+				}
+			},// end gsFluid.native.lightbox
+			theme: {		// set current list showUI (showUI unimplemented)
+				init: function() {
+					// remap themeing function to prevent ad themes
+					eval("GS.theme._setCurrentTheme = "+GS.theme.setCurrentTheme.toString());
+					GS.theme.setCurrentTheme = function(themeid, b, fluidtrusted) {
+						if (fluidtrusted) { GS.theme._setCurrentTheme(themeid, b); }
+						else { GS.theme._setCurrentTheme(93, true); }
+					};
+
+					// make theme UI trusted
+					GS.Controllers.Lightbox.ThemesController.prototype["a.theme click"] = function(a) {
+						console.log("switch theme trusted (FROM UI)", a.attr("rel"));
+						gsFluid.native.theme.set(a.attr("rel"));
+						GS.guts.logEvent("themeChangePerformed", {theme : $(".title", a).text()});
+					};
+				},
+				set: function(themeID) {
+					console.log("Setting theme from gsFluid");
+					GS.theme.setCurrentTheme(themeID, true, true);
+				},
+				current: function(){
+					// Returns the whole theme object
+					// use currentTheme().themeID to get the ID
+					return GS.theme.currentTheme;
+				},
+				list: function() {
+					return GS.theme.themes;
+				},
+				showUI: function() {											//TODO!!!!!! // who cares
+					return false;
+				}
+			},	// end gsFluid.native.theme
 			init: function() {
-				// remap themeing function to prevent ad themes
-				eval("GS.theme._setCurrentTheme = "+GS.theme.setCurrentTheme.toString());
-				GS.theme.setCurrentTheme = function(themeid, b, fluidtrusted) {
-					if (fluidtrusted) { GS.theme._setCurrentTheme(themeid, b); }
-					else { GS.theme._setCurrentTheme(93, true); }
-				};
-				
-				// make theme UI trusted
-				GS.Controllers.Lightbox.ThemesController.prototype["a.theme click"] = function(a) {
-					console.log("switch theme trusted (FROM UI)", a.attr("rel"));
-					gsFluid.nativetheme.set(a.attr("rel"));
-					GS.guts.logEvent("themeChangePerformed", {theme : $(".title", a).text()});
-				};
-			},
-			set: function(themeID) {
-				console.log("Setting theme from gsFluid");
-				GS.theme.setCurrentTheme(themeID, true, true);
-			},
-			current: function(){
-				// Returns the whole theme object
-				// use currentTheme().themeID to get the ID
-				return GS.theme.currentTheme;
-			},
-			list: function() {
-				return GS.theme.themes;
-			},
-			showUI: function() {											//TODO!!!!!! // who cares
-				return false;
+				gsFluid.native.theme.init();
+				gsFluid.native.lightbox.init();
 			}
-		},	// end gsFluid.nativetheme
+		},// end gsFluid.native
 		
 		dock: {
 			menu: { // the dock menu management system is cool, you should use it for your other Fluid Projects
@@ -233,6 +380,7 @@ gsFluid = {			// global object
 				$.subscribe('gs.player.stopped', gsFluid.dock.update);
 				// $.subscribe('gs.player.queue.change', gsFluid.dock.update);				
 				// write initial menu
+				document.title = 'Grooveshark';
 				gsFluid.dock.menu.write( gsFluid.dock.menu.build() );
 			},
 			badge: function() {
@@ -242,15 +390,12 @@ gsFluid = {			// global object
 					window.fluid.dockBadge = $badge.innerText;
 				}
 			},
-			update: function( data ){
+			update: function( data ){				
 				document.title = 'Grooveshark';
 				if ( gsFluid.player.isPlaying() ) {
 					gsFluid.growl.notificationForSong(gsFluid.player.song());
 				}
 				gsFluid.dock.menu.write( gsFluid.dock.menu.build() );
-				if ( gsFluid.theme.active ) {
-					gsFluid.theme.update();
-				}
 			}
 		
 		}, // end gsFluid.dock
@@ -286,7 +431,6 @@ gsFluid = {			// global object
 					localY + window.screenTop + window.outerHeight - window.innerHeight
 				];
 			},
-			
 			makeBar: function( $el ) {
 				$el = jQuery($el); 
 				// you can only make draggable once
@@ -383,7 +527,6 @@ gsFluid = {			// global object
 					
 				return $el;
 			}, // end gsFluid.window.drawTrafficLights 
-			
 			toggleMinimize: function() { // wrapper function. delicious abstraction
 				if ( gsFluid.theme.selected ) {
 					gsFluid.window.toggleMinimizeToTheme( gsFluid.theme.selected );
@@ -392,7 +535,6 @@ gsFluid = {			// global object
 					gsFluid.window.toggleSmall();
 				}
 			}, // end toggleMinimize
-			
 			//MINTHEME 
 			toggleMinimizeToTheme: function ( theme ) {
 				if ( gsFluid.window.minimizedDimensions ) {
@@ -483,33 +625,37 @@ gsFluid = {			// global object
 		
 		// @THEME
 		theme: {
-			current:	false,
-			active:		false,
+			selected: 	false,  // currently selected theme
+			current:	false,	// current theme object
+			active:		false,	// is the theme active?
 			repo:		false,	// stores theme data downloaded from gsFluid.resources.r/themes/list.json,
-								// or the theme itself after it is downloaded
+								// or the themes themselves after downloading
 			get: function( themeRef ) { // themeRefs are the info stubs in repositories
 				if ( gsFluid.theme.validateRef(themeRef) ){
-					var theme;
+					var theme, themePath = gsFluid.theme.repo.path + themeRef.shortname + '/';
 					// load base theme.js file
-					var req = get(gsFluid.theme.repo.path + themeRef.shortname + '/theme.js');
+					var req = get(themePath + 'theme.js');
 					// themes aren't strict JSON yet so we can't use this
 					// theme = JSON.parse(req.responseText);
 					// instead, eval()
 					eval('theme = ' + req.responseText);
+					theme.r = themePath;
 					
 					// get HTML, make replacements, attatch to theme
-					req = get(gsFluid.theme.repo.path + themeRef.shortname + '/theme.html');
-					theme.html = req.responseText.replace(theme.resources, gsFluid.theme.repo.path + themeRef.shortname);
+					req = get(themePath + 'theme.html');
+					theme.html = req.responseText.replace(theme.resources, themePath);
 
 					// get CSS, make replacements, attatch to theme
-					req = get(gsFluid.theme.repo.path + themeRef.shortname + '/theme.css');
-					theme.css = req.responseText.replace(theme.resources, gsFluid.theme.repo.path + themeRef.shortname);
+					req = get(themePath + 'theme.css');
+					theme.css = req.responseText.replace(theme.resources, themePath);
 
 					// get custom JS, if we use it
 					if (theme.customJS) {
-						req = get(gsFluid.theme.repo.path + themeRef.shortname + '/custom.js');
+						req = get(themePath + 'custom.js');
 						theme.customJS = req.responseText;
 					}
+					
+					// set resources path
 					// validate
 					if ( gsFluid.theme.validate(theme) ){
 						gsFluid.theme.repo.themes[themeRef.shortname] = theme;
@@ -542,7 +688,7 @@ gsFluid = {			// global object
 							gsFluid.theme.repo = data;
 							return true;
 						} else {
-							console.log("invalid theme repo");
+							console.log(data, "is an invalid theme repo");
 							return false;
 						}
 					} 
@@ -557,13 +703,14 @@ gsFluid = {			// global object
 					theme.height && 
 					theme.metadata && 
 					(theme.metadata.gsFluidMinVersion <= gsFluid.version) &&
-					minimizeButtonDestination &&
-					theme.resources 
+					theme.minimizeButtonDestination &&
+					theme.resources &&
+					theme.drag
 				) {
 					return true;
 				}
 				if (theme.metadata.gsFluidMinVersion > gsFluid.version) {
-					console.log("This theme is too new for your version of Grooveshark Desktop", theme);
+					console.log("This theme is too new for your version of Grooveshark Desktop \n please upgrade to the newest version by visiting http://jake.teton-landis.org/projects/gsFluid", theme);
 					return false;
 				}
 				console.log("theme", theme, "failed validation");
@@ -579,7 +726,7 @@ gsFluid = {			// global object
 				console.log("themeRef", themeRef, "failed validation");	
 				return false;
 			},
-			apply: function( theme ){ //TODO: rewrite without replace() to match new theme format
+			apply: function( theme ){
 				// validate theme
 				if ( gsFluid.theme.validate(theme) ) {
 					// Hide everything
@@ -588,75 +735,37 @@ gsFluid = {			// global object
 						'visibility': 'hidden'
 					});
 					// add custom CSS
-					$('head').append('<style id="microControllerCSS" type="text/css" media="screen">'+theme.css.replace(theme.resources, gsFluid.resources.r)+'</style>');
+					$('head').append('<style id="microControllerCSS" type="text/css" media="screen">'+theme.css+'</style>');
 					// add custom HTML
-					$('body').prepend(theme.html.replace(theme.resources, gsFluid.resources.r)).addClass('microControllerEnabled');
+					$('body').prepend(theme.html).addClass('microControllerEnabled');
 
 					if (theme.customJS) {
-						$('head').append('<script id="microControllerJS" type="text/javascript">'+theme.customJS+'</script>');
-						gsFluid.theme.current = theme;
-						gsFluid.theme.active = true;
-						
-					} else {
-						var song = gsFluid.player.song();
-						// SET UP ACTIONS USING SUPPLIED SELECTORS
-						//menubar
-						gsFluid.window.makeBar( $('#microController '+theme.drag) );
-						// pause/play button
-						$('#microController '+theme.play).mouseup(function(e){
-							gsFluid.player.togglePlay();
-							$(this).toggleClass(gsFluid.theme.current.pause);
-						});
-						if ( !gsFluid.player.isPlaying() ) {
-							$('#microController '+theme.play).addClass(theme.pause);
-						}
-						// next
-						$('#microController '+theme.next).mouseup( gsFluid.player.next );
-						// prev
-						$('#microController '+theme.prev).mouseup( gsFluid.player.prev );
-						
-						gsFluid.theme.current = theme;
-						gsFluid.theme.active = true;
-						
-						gsFluid.theme.progressInterval = setInterval( "gsFluid.theme.updateProgress()", 500 );
-						
-						
-						gsFluid.theme.update();
+						$('head').append('<script id="microControllerJS" type="text/javascript">'+theme.customJS+'</script>');						
 					}
+					// SET UP ACTIONS USING SUPPLIED SELECTORS
+					//menubar
+					gsFluid.window.makeBar( $('#microController '+theme.drag) );
+					
+					gsFluid.theme.current = theme;
+					gsFluid.theme.active = true;
+					
+					// initiate theme's functions
+					gsFluid.theme.statusUpdateInterval = setInterval( "gsFluid.theme.current.statusUpdate()", 500 );
+					$.subscribe("gsFluid.artworkChanged", gsFluid.theme.current.artworkChanged);
+					$.subscribe("gsFluid.songChanged", gsFluid.theme.current.songChanged);
+					$.subscribe("gsFluid.playStateChanged", gsFluid.theme.current.playStateChanged);
+					gsFluid.theme.current.themeReady();
+					
+					// success!
+					return true;
 				} else {
 					console.log("Invalid theme", theme);
 					return false;
 				}
 			}, // end applyTheme
-			updateProgress: function() { 
-				// PRIVATE API ACCESS // REFACTOR INTO gsFluid.player.progress
-				var stat = GS.player.getPlaybackStatus();
-				if ( stat ) {
-					var p = gsFluid.theme.current.progress;
-					u = (p.max - p.min) * Math.min(1, stat.position / stat.duration) + p.min;
-					u = isNaN(u) ? 0 : u;
-					// console.log('Progress', u);
-					$('#microController '+p.selector).css(p.property, u+p.units);
-				}
-			},
-			update: function() {
-				var song = gsFluid.player.song();
-				var theme = gsFluid.theme.current;
-				// art
-				if ( (song.coverart.length === 0) || (song.coverart == 'http://beta.grooveshark.com/static/amazonart/mdefault.png') ) {
-					song.coverart = theme.noartfile.replace(theme.resources, gsFluid.resources.r);
-				}
-				$('#microController '+theme.art+' img').attr('src', song.coverart );
-				// song info
-				$('#microController '+theme.song.title).text( song.title );
-				$('#microController '+theme.song.artist).text( song.artist );
-				$('#microController '+theme.song.album).text( song.album );
-			
-				
-			}, //end update
 			remove: function() {
 				// remove progressbar updater
-				clearInterval( gsFluid.theme.progressInterval );
+				clearInterval( gsFluid.theme.statusUpdateInterval );
 				
 				$('#microControllerCSS').remove();
 				$('#microController').remove();
@@ -666,14 +775,121 @@ gsFluid = {			// global object
 				});   
 				gsFluid.theme.active = false;
 			}, // end remove
+			select: function( themeOrRef ) {
+				if ( gsFluid.theme.validateRef(themeOrRef) ) {
+					gsFluid.theme.selected = gsFluid.theme.get(themeOrRef);
+				} else if ( gsFluid.theme.validate(themeOrRef) ) {
+					gsFluid.theme.selected = themeOrRef;
+				}
+			}, // end select
 			init: function() {
 				gsFluid.theme.getRepo( gsFluid.resources.r+'themes.js' );
 			} // end init
-			
-			
-			
-			
 		}, //end gsFluid.theme
+		lightbox: {
+			lbcontainer: '<div class="lbcontainer gsFluid"  > <!-- "gs_lightbox_gsFluid" style="display: none; " -->  <div id="lightbox_header">  <div class="cap right">  <div class="cap left">  <div class="inner">  <h3>Grooveshark Desktop Theme</h3>  <p>Select one of the themes below to personalize Grooveshark.</p>  </div>  </div>  </div>  </div>  <div id="lightbox_content" class="gsFluid">  <div id="gsFluid_content" class="lightbox_content_block gsFluid">  <!--$CONTENT_HERE-->  </div>  <div id="lightbox_footer">  <div class="shadow"></div>  <div class="highlight"></div>  <ul class="right">  <li class="first last">  <button class="btn btn_style4 close" type="button">  <div>  <span>Close</span>  </div>  </button>  </li>  </ul>  <div class="clear"></div>  </div>  <div class="clear"></div>  </div> </div>',
+			show: function( HTMLview ) {
+				// PRIVATE API USE
+				gsFluid.lightbox.el.html( HTMLview );
+				GS.lightbox.open("gsFluid",null,true);
+			},
+			close: function() {
+				// PRIVATE API USE
+				GS.lightbox.close(true);
+				gsFluid.lightbox.remove();
+			},
+			remove: function() {
+				gsFluid.lightbox.el.empty();
+			},
+			init: function(){
+				$(gsFluid.lightbox.lbcontainer).appendTo( $('#lightbox') );
+				gsFluid.lightbox.el = $("#gsFluid_content");
+			}
+		}, //end gsFluid.lightbox
+		ui: {
+			init: function() {
+				$('<li class="last"><button class="btn btn_style1" id="gsFluid_theme_button"><span class="label">Themes</span></button></li>').addClass('.gsFluidButton').appendTo( $('#userOptions') );
+				$('li.locales').removeClass('last');
+				gsFluid.ui.themebutton = $("#gsFluid_theme_button").mouseup( gsFluid.ui.themeButtonClick );
+			},
+			themeButtonClick: function(e){
+				gsFluid.lightbox.show( gsFluid.ui.listForRepo(gsFluid.theme.repo) );
+				$('.gsFluid_theme > a').click(function(){
+					console.log("theme button clicked", this);
+					$(this).siblings().removeClass('selected');
+					$(this).addClass('selected');
+					gsFluid.theme.select( gsFluid.theme.repo.themes[$(this).attr('rel')] );
+				});
+				//gsFluid.lightbox.show( "LOL" )
+			},
+			listForRepo: function( repo ){
+				var html = '<div class="lightbox_content_block"> 	<p>Theme selections will be saved via a cookie. Press the minimize button to activate the microcontroller</p> 	<div class="clear noHeight"></div> </div> <div class="lightbox_content_block separatedContent"> 	<div class="shadow"></div> 	<p>Themes:</p> ';
+				html += '<ul>'
+				for (theme in repo.themes) {
+					if (gsFluid.theme.validateRef(repo.themes[theme]) ) {
+						html+='<li class="gsFluid_theme">';
+						html+=	'<a rel="'+repo.themes[theme].shortname+'">'
+						html+=		'<img src="'+repo.path+repo.themes[theme].shortname+'/'+repo.themes[theme].preview+'" alt="'+repo.themes[theme].fullname+'" />'
+						html+=		'<div class="gsFluid_name">'+repo.themes[theme].fullname+'</div>'
+						html+=		'<div class="gsFluid_author">'+repo.themes[theme].author+'</div>'
+						html+=	'</a>'
+						html+='</li>'
+					} else if (gsFluid.theme.validate(repo.themes[theme]) ) {
+						html+='<li class="gsFluid_theme">';
+						html+=	'<a rel="'+repo.themes[theme].metadata.shortname+'">'
+						html+=		'<img src="'+repo.path+repo.themes[theme].metadata.shortname+'/'+repo.themes[theme].preview+'" alt="'+repo.themes[theme].fullname+'" />'
+						html+=		'<div class="gsFluid_name">'+repo.themes[theme].metadata.fullname+'</div>'
+						html+=		'<div class="gsFluid_author">'+repo.themes[theme].metadata.author+'</div>'
+						html+=	'</a>'
+						html+='</li>'
+					}
+				}
+				html += '</ul>'
+				html += '<div class="clear noHeight"></div></div>'
+				return html;
+			}
+		},
+		
+		pref: {
+			p: false, // stores the active preference hash
+			load: function(){
+				// TODO load JSON cookie to pref.p
+			},
+			save: function(){
+				// TODO save pref.p to JSON cookie
+			},
+			clear: function( wipeAll ){
+				gsFluid.pref.p = false;
+				if (wipeAll) {
+					// TODO clear preference cookie as well	
+				}
+			},
+			setPreferenceForKey: function( key, value ) {
+				gsFluid.pref.p[key] = value;
+			},
+			preferenceForKey: function( key ) {
+				return gsFluid.pref.p[key];
+			},
+			init: function(){
+				// read preference object from JSON cookie
+				var p =  gsFluid.pref.load()
+				p = ( (p === null) || (p == {}) ) ? {} : p;
+				// TODO apply settings
+				
+			}		
+		},
+		// TODO finish platform detection and switching so we can run this as
+		// a fluid instance, a prism webapp, and maybe even a Chrome userscript
+		platform: { // this should run first to detect availible featres
+			prefMethod: 'json_cookie', // how should we store preferences?
+			fluid: 		true, // enables dock support
+			mozilla: 	false,
+			horizontalChrome: false,
+			init: function(){
+				var p = {};
+				if ( window.fluid ) p.fluid = true;
+			}
+		},
 		
 		resources: {  //SETTINGS
 			glassIndex: -2,
@@ -688,14 +904,19 @@ gsFluid = {			// global object
 		},
 		
 		init: function() {
-			console.log('Initializing gsFluid, the unofficial Grooveshark Desktop client');
-			console.log('(c) 2011 Jake Teton-Landis <just.1.jake@gmail.com>');
-			console.log('version:', gsFluid.version);
+			// TODO rewrite init to load preferences first
+			console.log("Initializing gsFluid, the unofficial Grooveshark Desktop client \n Copyright (c) 2011 Jake Teton-Landis <just.1.jake@gmail.com> \n version:", gsFluid.version);
 			
-			console.log("Initializing gsFluid.nativetheme");
-			gsFluid.nativetheme.init();
+			console.log("Checking enviroment")
+			gsFluid.platform.init();
 			
-			console.log("running gsFluid.enablePremium");
+			console.log("Initializing gsFluid.player");
+			gsFluid.player.init();
+			
+			console.log("Initializing gsFluid.native");
+			gsFluid.native.init();
+			
+			console.log("Initializing gsFluid.enablePremium");
 			gsFluid.enablePremium();
 			
 			console.log("Initializing gsFluid.dock");
@@ -713,8 +934,14 @@ gsFluid = {			// global object
 			console.log("Initializing gsFluid.theme");
 			gsFluid.theme.init();
 			
-			console.log("Initializing userstyle");
+			console.log("Initializing gsFluid.css");
 			gsFluid.css.init();
+			
+			console.log("Initializing gsFluid.lightbox");
+			gsFluid.lightbox.init();
+			
+			console.log("Initializing gsFluid.ui")
+			gsFluid.ui.init();
 		}
 }; // end gsFluid
 

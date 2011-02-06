@@ -13134,7 +13134,7 @@
       $.publish("lightbox.position");
     }
 }
-), open : (function (a,b)
+), open : (function (a,b) //@ OPEN LIGHTBOX
 {
   var c = this.queue.indexOf(a), d = _.orEqual(this.priorities[a], 0);
   b = _.orEqual(b, null);

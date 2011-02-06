@@ -9,7 +9,10 @@
 			"homepage":	"http://jake.teton-landis.org/projects/gsFluid",
 		
 			"preview":	"preview.png",
-			"shortname":	"microController"
+			"shortname":	"microController",
+			
+			"version": 	0.8,
+			"gsFluidMinVersion": 0.04
 		}
 	}
 }

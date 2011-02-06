@@ -35,11 +35,11 @@ body.microControllerEnabled {
 #microController #controls .minimizeButton {
 	margin-top: 0;
 	margin-left: 18px;
-	background: url("$resources/themes/microController/fc_expand.png") no-repeat center;
+	background: url("$resources/fc_expand.png") no-repeat center;
 } #microController .minimizeButton:hover {
-	background: url("$resources/themes/microController/fc_expand.png") no-repeat center;
+	background: url("$resources/fc_expand.png") no-repeat center;
 } #microController .minimizeButton:active {
-	background: url("$resources/themes/microController/fc_expand_on.png") no-repeat center;
+	background: url("$resources/fc_expand_on.png") no-repeat center;
 }
 
 #microController .dragbar {
@@ -58,13 +58,13 @@ body.microControllerEnabled {
 	height: 250px;
 	position: absolute;
 	top: 0;
+	background: url("$resources/album.jpg") no-repeat center;
+	-webkit-background-origin: border-box;
+	background-origin: border-box;
+	-webkit-background-size: 100%;
+	background-size: 100%;
+	
 }
-
-#microController .coverart img {
-	width: 100%;
-	height: 100%;
-}
-
 #microController #data {
 	border-top: 1px solid rgba(30,30,30,.5);
 	border-bottom: 1px solid rgba(30,30,30,.5);
@@ -127,27 +127,27 @@ body.microControllerEnabled {
 }
 
 #microController .prev {
-	background: url("$resources/themes/microController/fc_skip_left.png") no-repeat center;
+	background: url("$resources/fc_skip_left.png") no-repeat center;
 } #microController .prev:active {
-	background: url("$resources/themes/microController/fc_skip_left_on.png") no-repeat center;
+	background: url("$resources/fc_skip_left_on.png") no-repeat center;
 }
 
 #microController .next {
-	background: url("$resources/themes/microController/fc_skip_right.png") no-repeat center;
+	background: url("$resources/fc_skip_right.png") no-repeat center;
 } #microController .next:active {
-	background: url("$resources/themes/microController/fc_skip_right_on.png") no-repeat center;
+	background: url("$resources/fc_skip_right_on.png") no-repeat center;
 }
 
 #microController #controls .play {
 	margin-top: -2px;
 	height: 30px;
-	background: url("$resources/themes/microController/fc_pause.png") no-repeat center;
+	background: url("$resources/fc_pause.png") no-repeat center;
 } #microController  #controls .play:active {
-	background: url("$resources/themes/microController/fc_pause_on.png") no-repeat center;
+	background: url("$resources/fc_pause_on.png") no-repeat center;
 }
-#microController #controls .pause.pause {
-	background-image: url("$resources/themes/microController/fc_play.png") !important;
+#microController #controls .play.paused {
+	background-image: url("$resources/fc_play.png") !important;
 }
-#microController #controls .play.pause:active {
-	background-image: url("$resources/themes/microController/fc_play_on.png") !important;
+#microController #controls .play.paused:active {
+	background-image: url("$resources/fc_play_on.png") !important;
 }

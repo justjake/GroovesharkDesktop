@@ -6,45 +6,103 @@
 
 {
 	metadata: {
-		title:	"microController",
-		author:	"Jake Teton-Landis",
-		email:	"just.1.jake@gmail.com", 
-		url:	"http://jake.teton-landis.org",
+		fullname:	"microController Default Theme",
+		author:		"Jake Teton-Landis",
+		email:		"just.1.jake@gmail.com",
+		homepage:	"http://jake.teton-landis.org/projects/gsFluid",
+	
+		preview:	"preview.png",
+		shortname:	"microController",
 		
 		version: 0.8,
 		gsFluidMinVersion: 0.04
 	},							
-								
+	r: null,			// stores the path to theme files after the theme is loaded							
 	customJS: false,	// specify custom javascript in `custom.js`
 						// allows you to supply custom javascript for your theme
-						// note that if you use custom js, no controls will be
-						// automatically created for you except the drag bar
+						// in adition to the functions below.
 				
 	width: 	250,		// dimensions of your theme & the thus the window
 	height:	250,
-	resources: /\$resources/g, 		// every instance of this regex (here, '$resources/') in your HTML and CSS 
+	resources: /\$resources\//g, 		// every instance of this regex (here, '$resources/') in your HTML and CSS 
 									// will be replaced with the actual resource path to your theme
 									
-minimizeButtonDestination: '#controls',	// selector where we put the minimize toggle button.
-// these controls automatically bound to the supplied selectors
-	drag:	'.coverart',	// drag: what can the window be dragged by?
-	pause:	'pause',		// pause is not a selector, but an actual class that is applied to .play when necissary
-	play:	'.play',		// pause/play button
-	next:	'.next',
-	prev:	'.prev',
-	art:	'.coverart',	// the first <img> in this selector will become the cover art
-	progress: {						//progress bar
-		selector: 	'#progress',	
-		property: 	'width',		// what CSS property do you want modified?
-		units: 		'%',			// the CSS unit ending
-		min: 		0,				// min ammount of said units
-		max: 		100
-		
-		// progress formula:
-		// (max - min) * ( songPosition / songDuration ) + min + units 
-		// example comutation: (100 - 0) * (72585.57823129251 / 301662.0408163265) + 0 + '%' yields a percentage width
+	minimizeButtonDestination:	'#controls', // selector where we put the minimize toggle button.
+	drag:						'.coverart', // selector for what the window can be dragged by
+	/**
+	 * Called when album art changes.
+     * @param {String} artworkURL URL of the new album art.
+     */
+	artworkChanged: function( artworkURL ) {
+		console.log(artworkURL);
+		if ( (artworkURL === 0) || (artworkURL == 'http://beta.grooveshark.com/static/amazonart/mdefault.png') || (artworkURL === "") || (artworkURL == 'http://beta.grooveshark.com/static/amazonart/m') ) {
+			artworkURL = gsFluid.theme.current.r + 'NoAlbumArt.png';
+		}
+		$('#microController .coverart').css('background-image', 'url("'+artworkURL+'")' );
 	},
-	//TODO: this path just changed, theme will be wierd
-	noartfile: 'NoAlbumArt.png',  // file to use if there is no cover art
-	song:	{title: '.title', artist: '.artist', album: '.album'}	// selectors to update with current song info. Be specific, this is .text(valiue) replacement
+	/**
+	 * Called when Grooveshark's playback state changes
+	 * 0: stopped/no queue
+	 * 1: playing
+	 * 2: paused
+     * @param {Number} Number indicating playback state. 
+     */
+	playStateChanged: function( playState ) {
+		if (playState === 2) {
+			$('#microController .play').addClass('paused');
+		} else if (playState === 1) {
+			$('#microController .play').removeClass('paused');
+		}
+	},
+	/**
+	 * Called periodically (currently every 500 milliseconds).
+	 * Allows you to poll for state changes and update your display accordingly. 
+	 * Good for drawing progress bars.
+	 * See gsFluid.player.progress() for easy access to progress information.
+     */
+	statusUpdate: function () {
+		var prog = gsFluid.player.progress();
+		if (gsFluid.player.progress() == 0) { prog = 1 }
+		$('#microController #progress').css('width', prog*100 + '%');
+	},
+	/**
+	 * Called when your theme has loaded. Do your setup here.
+     */
+	themeReady: function() {
+		$('#microController .play').mouseup(function(e){
+			gsFluid.player.togglePlay();
+		});
+		if ( !gsFluid.player.isPlaying() ) {
+			$('#microController .play').addClass('paused');
+		}
+		// next
+		$('#microController .next').mouseup( gsFluid.player.next );
+		// prev
+		$('#microController .prev').mouseup( gsFluid.player.prev );
+		
+		// update first
+		this.artworkChanged( gsFluid.player.song().coverart );
+		this.songChanged( gsFluid.player.song() );
+	},
+	/**
+	 * Called when the current song changes. The song object is the same as the output
+	 * of gsFluid.player.song()
+	 * song.title: 	The title of the song
+	 * song.album: 	The album of the song
+	 * song.artist: the song's artist
+	 * song.coverart: URL to coverart of song.
+	 * song.duration: Estimated length of the song.
+	 * (If there is no song) song.none == true
+     * @param {Song} song object
+     */
+	songChanged: function( song ) {
+		if (song.none) {
+			song.title = "Nothing Playing";
+			song.artist = "";
+			song.album = "";
+		}
+		$('#microController #data .title').text( song.title );
+		$('#microController #data .artist').text( song.artist );
+		$('#microController #data .album').text( song.album );
+	}
 }
