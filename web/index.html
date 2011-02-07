@@ -6,6 +6,23 @@
 <head>
 	<title>Grooveshark Desktop | Jake Teton-Landis</title>
 	<link rel="stylesheet" href="/css.css" type="text/css" />
+	<style type="text/css" media="screen">
+		.micro {
+			position: absolute;
+			top: 340px;
+			z-index: 5;
+		}
+		.previews {
+			position: relative;
+		}
+		.normal {
+			position: relative;
+			left: 20px;
+		}
+		.c {
+			clear: both;
+		}
+	</style>
 </head>
 
 <!-- 
@@ -27,9 +44,10 @@ Don't judge me.
 				<li>miniController, minify, and fullscreen view modes</li>
 			</ul>
 		</p>
-		<p>
-			<img src="images/gsDesktopPreview-mini.png" alt="the new miniController" />
-			<img src="images/gsDesktopPreview-searchSmall.png" alt="Grooveshark Desktop" />
+		<p class="previews">
+			<img class="micro" src="images/gsDesktopPreview-mini.png" alt="the new miniController" />
+			<img class="normal" src="images/gsDesktopPreview-searchSmall.png" alt="Grooveshark Desktop" />
+			<div class="c"></div>
 		</p>
 		<h2 id="downloads">downloads</h2>
 		<p>
@@ -108,6 +126,14 @@ Don't judge me.
 		<h2>known issues</h2>
 		<p>
 			<ul>
+				<li>
+					0.04
+					<ul>
+						<li>Custom theme repository support unfinished</li>
+						<li>close button does nothing, exists just for comfort</li>
+						<li>(Fluid): javascript window cannot drag out of a display. use spaces or enable 'Drag Window from Anywhere' to move between displays</li>
+					</ul>
+				</li>
 				<li>
 					0.03
 					<ul>
