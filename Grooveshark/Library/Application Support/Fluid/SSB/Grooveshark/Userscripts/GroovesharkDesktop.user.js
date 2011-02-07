@@ -557,19 +557,14 @@ gsFluid = {			// global object
 					}).appendTo($el);
 				
 				var minimize = lightProto.clone().addClass('minimizeButton').mouseup(function(){
-							console.log('trying to hide');
-							window.fluid.hide();
-							
-							// we pass 'this' along for a place to save isMinimized and other data
-							//gsFluid.window.toggleSmall( this );
-							gsFluid.window.toggleMinimize();
-							
-						}).appendTo($el);
+						// We're doing better things now.
+						// window.fluid.hide();
+						gsFluid.window.toggleMinimize();
+					}).appendTo($el);
 
 				var maximize = lightProto.clone().addClass('maximizeButton').mouseup(function(){
-							console.log('trying to maximize');
-							gsFluid.window.toggleMaximize();
-						}).appendTo($el);
+						gsFluid.window.toggleMaximize();
+					}).appendTo($el);
 					
 				return $el;
 			}, // end gsFluid.window.drawTrafficLights 
@@ -965,7 +960,7 @@ gsFluid = {			// global object
 			load: function(){
 				// TODO load JSON cookie to pref.p
 				var p = $.cookie('gsFluidPreferences');
-				p = (p === null) ? "{}" : p;
+				p = ( (p === null) || (p === 'false') ) ? "{}" : p;
 				gsFluid.pref.p = JSON.parse(p);
 			},
 			save: function(){
@@ -1030,45 +1025,51 @@ gsFluid = {			// global object
 		init: function() {
 			// TODO rewrite init to load preferences first
 			console.log("Initializing gsFluid, the unofficial Grooveshark Desktop client \n Copyright (c) 2011 Jake Teton-Landis <just.1.jake@gmail.com> \n version:", gsFluid.version);
+			try {
+				console.log("Checking enviroment");
+				gsFluid.platform.init();
 			
-			console.log("Checking enviroment");
-			gsFluid.platform.init();
+				console.log("Retrieving preferences...");
+				gsFluid.pref.init();
 			
-			console.log("Retrieving preferences...");
-			gsFluid.pref.init();
+				console.log("Initializing gsFluid.player");
+				gsFluid.player.init();
 			
-			console.log("Initializing gsFluid.player");
-			gsFluid.player.init();
+				console.log("Initializing gsFluid.native");
+				gsFluid.native.init();
 			
-			console.log("Initializing gsFluid.native");
-			gsFluid.native.init();
+				console.log("Initializing gsFluid.enablePremium");
+				gsFluid.enablePremium();
 			
-			console.log("Initializing gsFluid.enablePremium");
-			gsFluid.enablePremium();
+				console.log("Initializing gsFluid.dock");
+				gsFluid.dock.init();
 			
-			console.log("Initializing gsFluid.dock");
-			gsFluid.dock.init();
+				mediaKeysPlugin = { // In my ideal world this works for apple remote too
+					forward: gsFluid.player.next,
+					backward: gsFluid.player.prev,
+					play: gsFluid.player.togglePlay
+				};	
 			
-			mediaKeysPlugin = { // In my ideal world this works for apple remote too
-				forward: gsFluid.player.next,
-				backward: gsFluid.player.prev,
-				play: gsFluid.player.togglePlay
-			};	
+				console.log("Initializing gsFluid.window");
+				gsFluid.window.init();
 			
-			console.log("Initializing gsFluid.window");
-			gsFluid.window.init();
+				console.log("Initializing gsFluid.theme");
+				gsFluid.theme.init();
 			
-			console.log("Initializing gsFluid.theme");
-			gsFluid.theme.init();
+				console.log("Initializing gsFluid.css");
+				gsFluid.css.init();
 			
-			console.log("Initializing gsFluid.css");
-			gsFluid.css.init();
+				console.log("Initializing gsFluid.lightbox");
+				gsFluid.lightbox.init();
 			
-			console.log("Initializing gsFluid.lightbox");
-			gsFluid.lightbox.init();
-			
-			console.log("Initializing gsFluid.ui");
-			gsFluid.ui.init();
+				console.log("Initializing gsFluid.ui");
+				gsFluid.ui.init();
+				
+				console.log("gsFluid loaded successfully!");
+				return true;
+			} catch (error) {
+				console.log("+ ====================== +\n  ERROR LOADING gsFluid:", error, "\n+ ====================== +");
+			}
 		}
 }; // end gsFluid
 
