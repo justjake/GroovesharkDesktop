@@ -4741,7 +4741,7 @@
 {
   GS.google.login(this.callback(this._loginSuccess, "google", b, c), this.callback(this._loginFailed, "google", c));
 }
-), _loginSuccess : (function (b,c,d,f)
+), _loginSuccess : (function (b,c,d,f) //@ LoginSuccess
 {
   if (f && f.userID == 0 || ! f)
     return this._loginFailed(b, d, f);
@@ -13147,18 +13147,15 @@
   else
     {
       this.curType && this.queue.indexOf(this.curType) === - 1 && this.queue.push(this.curType);
-      if (! (this.queue.length && c !== - 1 && c > - 1))
-        {
+      if (! (this.queue.length && c !== - 1 && c > - 1)) {
           this.curType = a;
           this.currentPriority = d;
           this.isOpen = true;
           $("#lightbox_wrapper .lbcontainer." + a)[$.String.underscore("gs_lightbox_" + a)](b);
-          $("#lightbox .lbcontainer." + a).show(1, (function ()
-{
-  f.positionLightbox();
-  $(this).find("form input:first:visible").focus();
-}
-)).siblings().hide();
+          $("#lightbox .lbcontainer." + a).show(1, (function () {
+			 f.positionLightbox();
+			 $(this).find("form input:first:visible").focus();
+		  } )).siblings().hide();
           this.trackLightboxView(a);
           if ($("#lightbox_wrapper").is(":visible"))
             this.queue.indexOf(a) === - 1 && this.queue.unshift(a);

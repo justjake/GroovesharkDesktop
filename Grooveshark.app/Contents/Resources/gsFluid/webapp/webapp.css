@@ -5,7 +5,15 @@
 	(c) 2011 Jake Teton-Landis
 */
 
+/* fixing the lightbox so we can drag window */
+#header {
+	z-index: 9999999;
+}
+
+
 /* Theme interface */
+#lightbox_wrapper .gsFluid .separatedContent {display: block; position: relative; margin: 0; padding: 10px 15px 15px; background-color: #f5f5f5;}
+
 .gsFluid_theme {
 	float: left;
 	width: 260px;
@@ -15,21 +23,31 @@
 .gsFluid_theme img {
 	width: 100%;
 }
+.gsFluid_theme > a {
+	color: inherit;
+}
 
 .gsFluid_theme > a > div {
 	margin-top: 2px;
+	text-align: center;
 }
+.gsFluid_theme > a > div.gsFluid_name {
+	font-weight: 400;
+}
+
+
+
 
 .gsFluid_theme a {
 	display: block;
-	margin: 5px 5px;
+	margin: 5px;
 	padding: 5px;
 }
 
 .gsFluid_theme a.selected {
-	border-radius: 4px;
+	border-radius: 3px;
 	border: 3px solid #1785CD;
-	margin: 2px 0;
+	margin: 2px;
 }
 
 /* SCROLLBARS */

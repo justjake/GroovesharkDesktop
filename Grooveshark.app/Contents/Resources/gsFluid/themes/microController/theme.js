@@ -14,7 +14,7 @@
 		preview:	"preview.png",
 		shortname:	"microController",
 		
-		version: 0.8,
+		version: 0.9,
 		gsFluidMinVersion: 0.04
 	},							
 	r: null,			// stores the path to theme files after the theme is loaded							
