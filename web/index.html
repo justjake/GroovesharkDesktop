@@ -19,16 +19,17 @@ Don't judge me.
 		<p>
 			This is an unofficial desktop client for Grooveshark.com. It features:
 			<ul>     
+				<li>Bowtie-like miniController with fully customizable themes</li>
 				<li>Media key support</li>
 				<li>Growl notifications</li>
 				<li>reduced pixel waste</li>
 				<li>native Last.fm support</li>
-				<li>fullscreen mode</li>
-				<li>Themeable microController mode</li>
+				<li>miniController, minify, and fullscreen view modes</li>
 			</ul>
 		</p>
 		<p>
-			<img src="GS-Desktop-Preview.png" alt="The application" />
+			<img src="images/gsDesktopPreview-mini.png" alt="the new miniController" />
+			<img src="images/gsDesktopPreview-searchSmall.png" alt="Grooveshark Desktop" />
 		</p>
 		<h2 id="downloads">downloads</h2>
 		<p>
@@ -42,8 +43,17 @@ Don't judge me.
 		<h2>coming soon</h2>
 		<p>
 			<ul>
-				<li>User interface for selecting themes and theme repos</li>
-				<li>Saving preferences (for things like themes)</li>
+				<li>More themes(?)</li>
+				<li>Consolidated user interface for settings like theme repo URL and default theme</li>
+				<li>Real miniController theme creation documentation. In the meantime, you can look at <a href="/projects/gsFluid/resources/themes/microController">this directory</a> to get a sense of how simple this is.
+					It's rather similar to Bowtie.
+					<ul>
+						<li>theme.js - your main theme file. Contains all the required functions and essential data (like width and height)</li>
+						<li>theme.html - the HTML structure of your theme. Please contain everything within a div with id="microController".</li>
+						<li>theme.css - your stylesheet will automatically be added when your theme is applied, and removed when expanded</li>
+						<li>You need to include some sort of preview and choose a unique shortname for your theme.</li>
+					</ul>
+					</li>
 			</ul>
 		</p>           
 		<h2>get in touch</h2>
@@ -58,10 +68,19 @@ Don't judge me.
 			<ul>
 				<li>0.04
 					<ul>
-						<li>Minimize to microController</li>
-						<li>Dynamic loading of microController themes</li>
+						<li>miniController - fully customizable.</li>
+						<li>Dynamic loading of miniController themes -- you'll always have the latest version.</li>
+						<li>Theme preferences are now saved (both native and miniController)</li>
 						<li>Online repository of microController themes</li>
-						<li><a href="themes.html">microController theming documentation</a></li>
+						<li>Style: iOS-like thin scrollbars</li>
+						<li>Bugfixes
+							<ul>
+								<li>window remains draggable when showing a lightbox popover</li>
+								<li>your native theme selection is no longer overwritten by theme 93 (mellow)</li>
+								<li>lightboxes position properly</li>
+								<li>traffic lights preload so they don't look weird on rollover</li>
+							</ul>
+						</li>
 					</ul>
 				</li>
 				<li>0.03

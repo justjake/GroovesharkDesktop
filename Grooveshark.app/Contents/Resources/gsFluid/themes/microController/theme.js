@@ -23,7 +23,7 @@
 						// in adition to the functions below.
 				
 	width: 	250,		// dimensions of your theme & the thus the window
-	height:	250,
+	height:	247,
 	resources: /\$resources\//g, 		// every instance of this regex (here, '$resources/') in your HTML and CSS 
 									// will be replaced with the actual resource path to your theme
 									
