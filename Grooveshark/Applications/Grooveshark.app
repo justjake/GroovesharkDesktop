@@ -1,1 +1,0 @@
-/Users/justjake/Documents/Projects/Grooveshark/Grooveshark.app
