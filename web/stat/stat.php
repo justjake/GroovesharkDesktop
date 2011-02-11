@@ -12,13 +12,14 @@ $dummyUser = array(
 function output( $full ) {
 	global $store, $incoming;
 	echo "Store: \n";
-	if ($full) { var_dump($store); }
-	else {
+	if ($full) { 
+		var_dump($store); 
+		echo "Incoming: \n";
+		var_dump($incoming);
+	} else {
 		echo(count($store["users"])); 
 		echo "\n";
 	}
-	echo "Incoming: \n";
-	if ($full) var_dump($incoming);
 }
 
 function writeUser( $user ) {

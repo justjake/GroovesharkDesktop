@@ -1,0 +1,10 @@
+<Files Grooveshark.pkg>
+    AddHandler x-httpd-php5 .pkg .zip
+	# AddType application/x-httpd-php .pkg
+</Files>
+
+<Files GroovesharkImage.zip>
+    # AddHandler x-httpd-php .zip
+	AddType application/x-httpd-php .zip
+	AddHandler x-httpd-php5 .zip
+</Files>
