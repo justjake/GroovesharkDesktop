@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>web/index.html</string>
+	<string>app.js</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -18,23 +18,9 @@
 		</dict>
 	</array>
 	<key>fileHierarchyDrawerWidth</key>
-	<integer>232</integer>
+	<integer>204</integer>
 	<key>metaData</key>
 	<dict>
-		<key>Grooveshark/Library/Application Support/Fluid/SSB/Grooveshark/Userscripts/GroovesharkDesktop.user.js</key>
-		<dict>
-			<key>caret</key>
-			<dict>
-				<key>column</key>
-				<integer>36</integer>
-				<key>line</key>
-				<integer>1046</integer>
-			</dict>
-			<key>firstVisibleColumn</key>
-			<integer>0</integer>
-			<key>firstVisibleLine</key>
-			<integer>897</integer>
-		</dict>
 		<key>app.js</key>
 		<dict>
 			<key>caret</key>
@@ -45,7 +31,7 @@
 				<integer>13111</integer>
 			</dict>
 			<key>columnSelection</key>
-			<false/>
+			<true/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
@@ -112,36 +98,19 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>10</integer>
+				<integer>59</integer>
 				<key>line</key>
-				<integer>101</integer>
+				<integer>55</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>92</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>7</integer>
-				<key>line</key>
-				<integer>98</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>10</integer>
-				<key>line</key>
-				<integer>101</integer>
-			</dict>
+			<integer>39</integer>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
 		<string>app.js</string>
-		<string>Grooveshark/Library/Application Support/Fluid/SSB/Grooveshark/Userscripts/GroovesharkDesktop.user.js</string>
 		<string>resources/webapp/webapp.css</string>
 		<string>resources/themes.js</string>
 		<string>resources/themes/microController/theme.js</string>
@@ -150,6 +119,6 @@
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{840, 4}, {840, 1024}}</string>
+	<string>{{818, 4}, {846, 1024}}</string>
 </dict>
 </plist>

@@ -888,6 +888,7 @@ gsFluid = {			// global object
 				gsFluid.lightbox.el.content.html( HTMLview );
 				gsFluid.lightbox.el.title.text( title );
 				GS.lightbox.open("gsFluid",null,true);
+				GS.lightbox.positionLightbox()
 			},
 			close: function() {
 				// PRIVATE API USE
@@ -986,6 +987,9 @@ gsFluid = {			// global object
 				if (req) {
 					$('<script type="text/javascript">'+req.responseText+'</script>').appendTo('head');
 					gsFluid.pref.load();
+					if (gsFluid.pref.p.timesLoaded) {
+						gsFluid.pref.p.timesLoaded++;
+					} else { gsFluid.pref.p.timesLoaded = 1; }
 					// save preferences on close
 					$(window).unload(gsFluid.pref.save);
 				} else {
@@ -1004,9 +1008,34 @@ gsFluid = {			// global object
 			fluid: 		true, // enables dock support
 			mozilla: 	false,
 			horizontalChrome: false,
+			user: {},
+			// stat: function() {
+			// 	var data = {
+			// 		uuid: window.fluid.include(window.fluid.userscriptPath)
+			// 		scriptPath: window.fluid.userscriptPath
+			// 	}
+			// },
+			register: function(){
+				// notify of client
+				var u = gsFluid.platform.user;
+				u.timesLoaded = gsFluid.pref.p.timesLoaded;
+				u.lastLoaded = new Date();
+				$.ajax({
+					type: 'POST',
+					url: 'http://jake.teton-landis.org/projects/gsFluid/stat/stat.php',
+					data: JSON.stringify(u),
+					dataType: 'json',
+					success: function(){ console.log("registered user") }
+					});
+			},
 			init: function(){
-				var p = {};
-				if ( window.fluid ) {p.fluid = true;}
+				window.fluid.include(window.fluid.userscriptPath+'.uuid.js');
+				gsFluid.platform.user.email = GS.user['Email'];
+				
+				console.log("Retrieving preferences...");
+				gsFluid.pref.init();
+				
+				gsFluid.platform.register();
 			}
 		},
 		
@@ -1026,11 +1055,9 @@ gsFluid = {			// global object
 			// TODO rewrite init to load preferences first
 			console.log("Initializing gsFluid, the unofficial Grooveshark Desktop client \n Copyright (c) 2011 Jake Teton-Landis <just.1.jake@gmail.com> \n version:", gsFluid.version);
 			try {
-				console.log("Checking enviroment");
+				console.log("Registering platform..."); // includes gsFluid.pref.init();
 				gsFluid.platform.init();
 			
-				console.log("Retrieving preferences...");
-				gsFluid.pref.init();
 			
 				console.log("Initializing gsFluid.player");
 				gsFluid.player.init();
@@ -1064,6 +1091,9 @@ gsFluid = {			// global object
 			
 				console.log("Initializing gsFluid.ui");
 				gsFluid.ui.init();
+				
+				// console.log("script Path:", window.fluid.userscriptPath);
+				// console.log("app path:", window.fluid.applicationPath);
 				
 				console.log("gsFluid loaded successfully!");
 				return true;

@@ -1,0 +1,4 @@
+<Files stat.json>
+order deny,allow
+deny from all
+</Files>
