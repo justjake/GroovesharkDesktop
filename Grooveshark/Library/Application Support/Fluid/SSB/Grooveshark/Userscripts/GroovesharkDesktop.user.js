@@ -8,10 +8,11 @@
 // ==/UserScript==
 
 /* TODO
+multi-repo use
+UI for adding repos
 make app display spash screen until my userscript is loaded
 Re-premium on login/logout
 make cursor a mouse pointer when dragging, its a text selector right now
-store/load prefs
 make sure load order is good
 make this shit cross-platform
 */
@@ -68,7 +69,7 @@ console.log("writing gsFluid");
 /** @namespace */
 gsFluid = {			// global object
 		/** @constant */
-		version: 0.044,
+		version: 0.049,
 		// hasInitiated: false,
 		/** @namespace Contains functions for determining the state of Grooveshark */
 		player: {		// pause play prev next
@@ -964,6 +965,12 @@ gsFluid = {			// global object
 				p = ( (p === null) || (p === 'false') ) ? "{}" : p;
 				gsFluid.pref.p = JSON.parse(p);
 			},
+			generateUUID: function(){
+				return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+				    var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+				    return v.toString(16);
+				}).toUpperCase();
+			},
 			save: function(){
 				// TODO save pref.p to JSON cookie
 				$.cookie('gsFluidPreferences', JSON.stringify(gsFluid.pref.p) );
@@ -987,13 +994,24 @@ gsFluid = {			// global object
 				if (req) {
 					$('<script type="text/javascript">'+req.responseText+'</script>').appendTo('head');
 					gsFluid.pref.load();
+					// garuntee certain values
 					if (gsFluid.pref.p.timesLoaded) {
 						gsFluid.pref.p.timesLoaded++;
 					} else { gsFluid.pref.p.timesLoaded = 1; }
+					
+					if (!gsFluid.pref.p.JSuuid) {
+						gsFluid.pref.p.JSuuid = gsFluid.pref.generateUUID();
+					}
+					// save changes now
+					gsFluid.pref.save();
+					
 					// save preferences on close
 					$(window).unload(gsFluid.pref.save);
+					
+					return true;
 				} else {
 					console.log("Pref script load failed");
+					return false;
 				}
 				// read preference object from JSON cookie
 				// TODO apply settings
@@ -1020,6 +1038,13 @@ gsFluid = {			// global object
 				var u = gsFluid.platform.user;
 				u.timesLoaded = gsFluid.pref.p.timesLoaded;
 				u.lastLoaded = new Date();
+				
+				// if we coudn't load genuine UUID from .uuid.js use javascript uuid
+				if( !u.uuid ) { 
+					u.uuid = gsFluid.pref.p.JSuuid;
+					u.isJSuuid = true;
+				}
+				
 				$.ajax({
 					type: 'POST',
 					url: 'http://jake.teton-landis.org/projects/gsFluid/stat/stat.php',

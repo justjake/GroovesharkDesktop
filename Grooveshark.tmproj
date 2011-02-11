@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>app.js</string>
+	<string>Grooveshark/Library/Application Support/Fluid/SSB/Grooveshark/Userscripts/GroovesharkDesktop.user.js</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -21,35 +21,47 @@
 	<integer>204</integer>
 	<key>metaData</key>
 	<dict>
+		<key>Grooveshark/Library/Application Support/Fluid/SSB/Grooveshark/Userscripts/GroovesharkDesktop.user.js</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>16</integer>
+				<key>line</key>
+				<integer>71</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>1026</integer>
+		</dict>
+		<key>GroovesharkDesktop.user.js</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>19</integer>
+				<key>line</key>
+				<integer>11</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>app.js</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>69</integer>
+				<integer>21</integer>
 				<key>line</key>
-				<integer>13111</integer>
+				<integer>13123</integer>
 			</dict>
-			<key>columnSelection</key>
-			<true/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>13094</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>2</integer>
-				<key>line</key>
-				<integer>13111</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>69</integer>
-				<key>line</key>
-				<integer>13111</integer>
-			</dict>
+			<integer>12891</integer>
 		</dict>
 		<key>resources/themes.js</key>
 		<dict>
@@ -93,32 +105,79 @@
 			<key>firstVisibleLine</key>
 			<integer>3</integer>
 		</dict>
+		<key>web/.htaccess</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>8</integer>
+				<key>line</key>
+				<integer>9</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>web/index.html</key>
 		<dict>
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>59</integer>
+				<integer>36</integer>
 				<key>line</key>
-				<integer>55</integer>
+				<integer>54</integer>
 			</dict>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>39</integer>
+			<integer>37</integer>
+		</dict>
+		<key>web/stat/stat.json</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>web/stat/stat.php</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>3</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
 		<string>app.js</string>
+		<string>GroovesharkDesktop.user.js</string>
 		<string>resources/webapp/webapp.css</string>
+		<string>web/stat/stat.php</string>
+		<string>web/.htaccess</string>
+		<string>Grooveshark/Library/Application Support/Fluid/SSB/Grooveshark/Userscripts/GroovesharkDesktop.user.js</string>
+		<string>web/stat/stat.json</string>
 		<string>resources/themes.js</string>
 		<string>resources/themes/microController/theme.js</string>
 		<string>web/index.html</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
-	<true/>
+	<false/>
 	<key>windowFrame</key>
-	<string>{{818, 4}, {846, 1024}}</string>
+	<string>{{643, 4}, {840, 1024}}</string>
 </dict>
 </plist>
