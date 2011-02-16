@@ -27,19 +27,28 @@
 		margin-right: 15px;
 	}
 
-.themeListHeader {
+.gsSubheader {
 	margin-bottom: 5px;
+	color: #333;
 }
 
-	.themeListHeader > h3 {
+	.gsSubheader > h3 {
 		font-weight: bold;
 		font-size: 14px;
 		float: left;
+		margin-bottom: 2px;
 	}
 
-	.themeListHeader > h6 {
+	.gsSubheader > h3 > em {
+		margin-left: .75em;
+		font-style: italic;
+		color: #dedede;
+	}
+
+	.gsSubheader > h6 {
 		font-size: 9px;
 		clear: both;
+		color: #666;
 	}
 
 	.removeThemeRepoButton {
@@ -64,7 +73,7 @@
 /* theme elements */
 .gsFluid_theme {
 	float: left;
-	width: 285px;
+	width: 280px;
 	text-align: center;
 }
 

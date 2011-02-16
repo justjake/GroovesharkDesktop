@@ -8,14 +8,20 @@
 // ==/UserScript==
 
 /* TODO
-multi-repo use
-UI for adding repos
+handle music queue because grooveshark relies on window.unload
+button to clear settings
+alwasy up-to-date version where majority of app is added via jsonp (<script>)? -> later, for those who want it
+	Multiplatform will be like this only, updating Prisms looks like a bitch
+multi-repo use *DONE*
+UI for adding repos *DONE*
 make app display spash screen until my userscript is loaded
 Re-premium on login/logout
 make cursor a mouse pointer when dragging, its a text selector right now
-make sure load order is good
+make sure load order is good *DONE*
 make this shit cross-platform
 */
+
+
 
 console.log("writing functions");
 
@@ -70,6 +76,17 @@ console.log("writing gsFluid");
 gsFluid = {			// global object
 		/** @constant */
 		version: 0.05,
+		log: undefined,
+		devmode: true, // @DEVMODE
+		debug: function() {
+			// unlimited arguments
+			
+			gsFluid.log = gsFluid.log || [];
+			gsFluid.log.push(arguments);
+			if (gsFluid.devmode == true ) {
+				console.log.apply( console, arguments );
+			}
+		},
 		// hasInitiated: false,
 		/** @namespace Contains functions for determining the state of Grooveshark */
 		player: {		// pause play prev next
@@ -144,7 +161,7 @@ gsFluid = {			// global object
 			},
 			event: function() {
 				var s = gsFluid.player.song(), state = gsFluid.player.state();
-				console.log("gsFluid.event");
+				gsFluid.debug("gsFluid.event");
 				// store the last song
 				if ( !gsFluid.player.lastSong ) {
 					gsFluid.player.lastSong = s;
@@ -157,20 +174,20 @@ gsFluid = {			// global object
 				// player state
 				if (gsFluid.player.lastState !== state ) {
 					gsFluid.player.lastState = state;
-					console.log("gsFluid.playStateChanged");
+					gsFluid.debug("gsFluid.playStateChanged");
 					$.publish("gsFluid.playStateChanged", state );
 				}
 				
 				// on album art change
 				if (gsFluid.player.lastSong.coverart !== s.coverart) {
-					console.log("gsFluid.artworkChanged");
+					gsFluid.debug("gsFluid.artworkChanged");
 					$.publish("gsFluid.artworkChanged", s.coverart);
 				}
 				
 				// on track change
 				if ( gsFluid.player.lastSong.id !== s.id ) {
 					gsFluid.player.lastSong = s;
-					console.log("gsFluid.songChanged");
+					gsFluid.debug("gsFluid.songChanged");
 					$.publish("gsFluid.songChanged", s );
 				}
 			},
@@ -270,7 +287,7 @@ gsFluid = {			// global object
 				}, //end close
 				closeclick: function( a, b ) {
 					b.preventDefault();
-					console.log("lightbox close");
+					gsFluid.debug("lightbox close");
 					if ($("#lightbox_wrapper .lbcontainer.gsFluid").css('display') === "block") {
 						GS.lightbox.close(true);
 						gsFluid.lightbox.remove();
@@ -278,8 +295,31 @@ gsFluid = {			// global object
 						GS.lightbox.close();	
 					}		  
 				},
+				positionLightbox: function() {
+					if (this.isOpen) {
+						this.curType !== "signup" && $("#lightbox_content").css("height", "auto");
+						var a = Math.max($("#lightbox_wrapper").width(), 400), b = Math.min(Math.max($("#lightbox_wrapper").height(), 100), $("body").height() - 70);
+						a = Math.round($("#application").width() / 2 - a / 2);
+						var c = Math.max(35, Math.round($("body").height() / 2 - b / 2)), d = $("#lightbox_content").height(), f = $("#lightbox_header", this.element).outerHeight() + $("#div.error.response:visible", this.element).outerHeight() + $("#lightbox_footer", this.element).outerHeight(), g = 0;
+						$(".measure", "#lightbox_content").each((function (h) {
+							g += $(h).height();
+						}));
+						b = Math.min(Math.max(150, parseInt(b - f, 10)));
+						gsFluid.debug('b: ',b, 'd :',d) // modification
+						if (b < d && ! $("#lightbox_content").is(".fixed_content")) {
+							b = Math.min((window.innerHeight - 70), b); // modification
+							gsFluid.debug('Proposed b: ',b);
+							$("#lightbox_content").height(b);
+							$(".lightbox_pane_content").height($("#lightbox_content").height() - $("#lightbox_content #pane_footer").outerHeight() - g);
+						}
+						$("#lightbox_wrapper").css({top : c, left : a});
+						$.publish("lightbox.position");
+					}
+				},
 				init: function() {
 					// replace functions
+					GS.lightbox.positionLightbox = gsFluid.native.lightbox.positionLightbox;
+					GS.Controllers.LightboxController.prototype.positionLightbox = gsFluid.native.lightbox.positionLightbox;
 					GS.lightbox.open = gsFluid.native.lightbox.open;
 					GS.lightbox.close = gsFluid.native.lightbox.close;
 					GS.Controllers.LightboxController.prototype[".close click"] = gsFluid.native.lightbox.closeclick;
@@ -288,8 +328,8 @@ gsFluid = {			// global object
 			theme: {		// set current list showUI (showUI unimplemented)
 				n: { // holds replacements
 					themeButtonClick: function(a) {
-						console.log("switch theme trusted (FROM UI)", a.attr("rel"));
-						gsFluid.native.theme.set(a.attr("rel"));
+						gsFluid.debug("switch theme trusted (FROM UI)", a.attr("rel")); // modification
+						gsFluid.native.theme.set(a.attr("rel")); // modification
 						GS.guts.logEvent("themeChangePerformed", {theme : $(".title", a).text()});
 					},
 					setCurrentTheme: function(themeid, b, fluidtrusted) {
@@ -305,7 +345,7 @@ gsFluid = {			// global object
 					}
 				}, // end native.theme.n
 				set: function(themeID) {
-					console.log("Setting theme from gsFluid");
+					gsFluid.debug("Setting theme from gsFluid");
 					GS.theme.setCurrentTheme(themeID, true, true);
 					//@ TODO: save theme to preferences
 					gsFluid.pref.p.nativeThemeID = themeID;
@@ -396,7 +436,7 @@ gsFluid = {			// global object
 				write: function( menu ) { // writes a menu from menu-array
 					var i;
 					gsFluid.dock.menu.clear();
-					console.log("writing menu", menu);
+					gsFluid.debug("writing menu", menu);
 					gsFluid.dock.menu._current = deepCopy(menu);
 					for (i = menu.length - 1; i >= 0; i--) {
 						if (typeof menu[i] === typeof [] ) {
@@ -406,13 +446,13 @@ gsFluid = {			// global object
 				},
 				clear: function() { //clears the current menu
 					var i;
-					console.log("clearing dock menu");
+					gsFluid.debug("clearing dock menu");
 					for (i = gsFluid.dock.menu._current.length - 1; i >= 0; i--){
 						if (typeof gsFluid.dock.menu._current[i] === typeof [] ) {
-							 console.log("removing "+gsFluid.dock.menu._current[i][0]);
+							 gsFluid.debug("removing "+gsFluid.dock.menu._current[i][0]);
 							window.fluid.removeDockMenuItem(gsFluid.dock.menu._current[i][0]);
 						} else { 
-							console.log("removing "+gsFluid.dock.menu._current[i]);
+							gsFluid.debug("removing "+gsFluid.dock.menu._current[i]);
 							window.fluid.removeDockMenuItem(gsFluid.dock.menu._current[i]); 
 						}
 					}
@@ -433,7 +473,7 @@ gsFluid = {			// global object
 				gsFluid.dock.menu.write( gsFluid.dock.menu.build() );
 			},
 			badge: function() {
-				console.log("Badging");
+				gsFluid.debug("Badging");
 				var $badge = jQuery('.nav_count');
 				if ($badge.length) {
 					window.fluid.dockBadge = $badge.innerText;
@@ -543,7 +583,7 @@ gsFluid = {			// global object
 				$el.mousemove(move);  
 
 				// this isn't jQuery unless it returns the element.
-				console.log("This element now is a window draggable", $el);
+				gsFluid.debug("Element", $el, " is a window draggable");
 				return $el;
 			}, // end makeBar
 			drawTrafficLights: function( $el ) {   
@@ -555,7 +595,7 @@ gsFluid = {			// global object
 				
 					
 				var close = lightProto.clone().addClass('closeButton').mouseup(function(){
-						console.log('trying to terminate');
+						gsFluid.debug('trying to terminate');
 						window.fluid.terminate();
 					}).appendTo($el);
 				
@@ -715,20 +755,20 @@ gsFluid = {			// global object
 						gsFluid.theme.repo[repoName].themes[themeRef.shortname] = theme;
 						return theme;
 					} else {
-						console.log("Bad theme", theme);
+						console.log("theme.get(", themeRef, ") failed: bad theme: ", theme);
 						return false;
 					}
 				} else {
-					console.log("Bad themeRef", themeRef);
+					console.log("theme.get failed: bad themeRef: ", themeRef);
 					return false;
 				}
 			},
-			getRepo: function( url ){
+			getRepo: function( url, isDefault ){
 				if (!url) {
-					console.log("getRep: No URL");
+					console.log("getRepo failed: No URL");
 					return false;
 				}
-				console.log("Attempting to retrieve theme repo at", url);
+				gsFluid.debug("Attempting to retrieve theme repo at", url);
 				var req = get(url);
 				if (req) {
 					var repo = JSON.parse(req.responseText);
@@ -736,6 +776,10 @@ gsFluid = {			// global object
 						repo.url = url;
 						// we need a no-theme theme in the repo so we can select to not use a theme.
 						repo.themes["false"] = false;
+						// default repos cannot be removed from the UI
+						if (isDefault) {
+							repo.isDefault = true;
+						}
 						// yeehaw multiple repos by name 
 						gsFluid.theme.repo[repo.shortname] = repo;
 						return repo;
@@ -744,7 +788,7 @@ gsFluid = {			// global object
 						return false;
 					}
 				} else {
-					console.log("getRepo: GET to", url, "failed");
+					console.log("getRepo failed: GET to", url, "failed");
 					return false;
 				}
 				
@@ -769,11 +813,12 @@ gsFluid = {			// global object
 						return true;
 					}
 					if (theme.metadata.gsFluidMinVersion > gsFluid.version) {
-						console.log("This theme is too new for your version of Grooveshark Desktop \n please upgrade to the newest version by visiting http://jake.teton-landis.org/projects/gsFluid", theme);
+						console.log("This theme is too new for your version of Grooveshark Desktop \nplease upgrade to the newest version by visiting http://jake.teton-landis.org/projects/gsFluid", theme);
 						return false;
 					}
 				} catch(err) {
-					console.log("theme", theme, "failed validation with error", err);
+					if (theme === false) { return false; }
+					console.log("theme", theme, "failed validation with error '", err,"'");
 					return false;
 				}
 				console.log("theme", theme, "failed validation");
@@ -789,7 +834,7 @@ gsFluid = {			// global object
 							return true;
 						}
 					} catch(err) { 
-						console.log("themeRef", themeRef, "failed validation with error", err);	
+						gsFluid.debug("themeRef", themeRef, "failed validation with error", err);	
 						return false;	
 					}
 					console.log("themeRef", themeRef, "failed validation");	
@@ -862,7 +907,7 @@ gsFluid = {			// global object
 					// success!
 					return true;
 				} else {
-					console.log("Invalid theme", theme);
+					console.log("theme.apply failed: Invalid theme: ", theme);
 					return false;
 				}
 			}, // end applyTheme
@@ -896,19 +941,34 @@ gsFluid = {			// global object
 						gsFluid.pref.save();
 						return true;
 					}
-					console.log("Selecting theme", themeOrRef, "failed");
+					console.log("theme.select(", themeOrRef, ") failed");
 					return false;
 				} else {
-					console.log("Clearing theme selection");
+					gsFluid.debug("Clearing theme selection");
 					gsFluid.theme.selected = false;
 					gsFluid.pref.p.chosenTheme = false;
 				}
 			}, // end select
 			init: function() {
+				var l, def = (gsFluid.devmode) ? 'devthemes.js' : 'themes.js';
+				
 				// we need repo be an object
 				gsFluid.theme.repo = {};
+				// load saved repos, ensure default repo
+				gsFluid.pref.p.repoList = gsFluid.pref.p.repoList || [];
+				gsFluid.pref.p.repoList[0] = ( gsFluid.resources.r+ def );
 				// get the default themes list ALWAYS
-				gsFluid.theme.getRepo( gsFluid.resources.r+'devthemes.js' );
+				l = gsFluid.pref.p.repoList;
+				for (var i=0; i < l.length; i++) {
+					if (i === 0) {
+						gsFluid.theme.getRepo(l[i], true);
+					} else {
+						gsFluid.theme.getRepo(l[i]);
+					}
+				};
+				
+				gsFluid.theme.getRepo( gsFluid.resources.r+ def, true );
+				
 				if (gsFluid.pref.p.chosenTheme) { 
 					gsFluid.theme.select( gsFluid.theme.repo[gsFluid.pref.p.chosenTheme.repo].themes[gsFluid.pref.p.chosenTheme.name], gsFluid.pref.p.chosenTheme.repo);
 				}
@@ -919,13 +979,14 @@ gsFluid = {			// global object
 				title: null,
 				content: null
 			},
-			lbcontainer: '<div class="lbcontainer gsFluid"  > <!-- "gs_lightbox_gsFluid" style="display: none; " -->  <div id="lightbox_header">  <div class="cap right">  <div class="cap left">  <div class="inner">  <h3>Grooveshark Desktop Mini</h3>   </div>  </div>  </div>  </div>  <div id="lightbox_content" class="gsFluid">  <div id="gsFluid_content" class="gsFluid">  <!--$CONTENT_HERE-->  </div>  <div id="lightbox_footer">  <div class="shadow"></div>  <div class="highlight"></div>  <ul class="right">  <li class="first last">  <button class="btn btn_style4 close" type="button">  <div>  <span>Close</span>  </div>  </button>  </li>  </ul>  <div class="clear"></div>  </div>  <div class="clear"></div>  </div> </div>',
+			lbcontainer: '<div class="lbcontainer gsFluid"  > <!-- "gs_lightbox_gsFluid" style="display: none; " -->  <div id="lightbox_header">  <div class="cap right">  <div class="cap left">  <div class="inner">  <h3>Grooveshark Desktop Mini</h3>   </div>  </div>  </div>  </div>  <div id="lightbox_content" class="gsFluid">  <div id="gsFluid_content" class="gsFluid">  <!--$CONTENT_HERE-->  </div> </div> <div id="lightbox_footer">  <div class="shadow"></div>  <div class="highlight"></div>  <ul class="right">  <li class="first last">  <button class="btn btn_style4 close" type="button">  <div>  <span>Close</span>  </div>  </button>  </li>  </ul>  <div class="clear"></div>  </div>  <div class="clear"></div>  </div> </div>',
 			show: function( HTMLview, title ) {
 				// PRIVATE API USE
 				gsFluid.lightbox.el.content.html( HTMLview );
 				gsFluid.lightbox.el.title.text( title );
 				GS.lightbox.open("gsFluid",null,true);
-				GS.lightbox.positionLightbox()
+				GS.lightbox.positionLightbox();
+				GS.lightbox.positionLightbox();
 			},
 			close: function() {
 				// PRIVATE API USE
@@ -936,7 +997,7 @@ gsFluid = {			// global object
 				gsFluid.lightbox.el.content.empty();
 			},
 			init: function(){
-				$(gsFluid.lightbox.lbcontainer).appendTo( $('#lightbox') );
+				$(gsFluid.lightbox.lbcontainer).prependTo( $('#lightbox') );
 				gsFluid.lightbox.el.content = $("#gsFluid_content");
 				gsFluid.lightbox.el.title = $(".lbcontainer.gsFluid .inner h3");
 			}
@@ -951,28 +1012,63 @@ gsFluid = {			// global object
 				var chosen = {}
 				chosen.name = $(this).attr('rel').split(" in ")[0];
 				chosen.repo = $(this).attr('rel').split(" in ")[1];
-				console.log("Chosen: ", chosen);
-				$(this).parent().siblings().children().removeClass('selected');
+				gsFluid.debug("Chosen: ", chosen);
+				$('.gsFluid_theme > a').removeClass('selected');
 				$(this).addClass('selected');
 				gsFluid.theme.select( gsFluid.theme.repo[chosen.repo].themes[chosen.name], chosen.repo );
+			},
+			removeRepoClick: function(e) {
+				var url = $(this).siblings('h6').text();
+				var name = $(this).siblings('h3').children('em').text();
+				// does this contain the selected theme?
+				try {
+					if (gsFluid.pref.p.chosenTheme.repo == name) {
+						gsFluid.pref.p.chosenTheme = false;
+					}
+				} catch (err) {
+					gsFluid.debug("removeRepoClick: No theme currently chosen ("+err+")");
+				}
+				// remove from prefs
+				gsFluid.pref.p.repoList.splice(gsFluid.pref.p.repoList.indexOf(url), 1);
+				gsFluid.pref.save();
+				// remove from repo object
+				delete gsFluid.theme.repo[name];
+				// remove UI
+				$(this).parent().parent().remove();
+				GS.lightbox.positionLightbox();
 			},
 			themeButtonClick: function(e){
 				gsFluid.lightbox.show( gsFluid.ui.settingsHTML(), "Desktop Settings" );
 				
+				// remove 'Remove' button from topmost 
+				
 				$('.addRepoButton').mouseup(function(e){
 					var url = $('#addRepoForm .gsTextfield input').val();
-					var repo = gsFluid.theme.getRepo(url);
-					if (repo) {
-						// SUCCESS! Refresh UI HTML
-						var newList = gsFluid.ui.listForRepo(repo);
-						$('.listForRepo').last().after(newList);
-						$('.'+repo.shortname+'UI .gsFluid_theme > a').click( gsFluid.ui.selectThemeClick );
-						$('#addRepoForm .gsTextfield input').val();
+					// check url against stored themes to prevent dupes
+					if (gsFluid.pref.p.repoList.indexOf(url) === -1) {
+						var repo = gsFluid.theme.getRepo(url);
+						if (repo) {
+							// SUCCESS! save to prefs list
+							gsFluid.pref.p.repoList.push(url);
+							gsFluid.pref.save();
+							// Add UI HTML
+							var newList = gsFluid.ui.listForRepo(repo);
+							$('.listForRepo').last().after(newList);
+							$('.'+repo.shortname+'UI .gsFluid_theme > a').click( gsFluid.ui.selectThemeClick );
+							$('.'+repo.shortname+'UI .removeThemeRepoButton').mouseup(gsFluid.ui.removeRepoClick);
+							$('#addRepoForm .gsTextfield input').val('');
+							GS.lightbox.positionLightbox();
+						} else {
+							// Failure. Notify failure.
+							// @TODO: improve this
+							$('.listForRepo').last().after('<div class="themeListHeader"><h6>Repo error. Check your input and try again</h6></div>');
+						}
 					} else {
-						// Failure. Notify failure.
-						$('.listForRepo').last().after('Shit son, that didn\'t work');
+						gsFluid.debug('URL ', url, 'is already present; discarding');
 					}
 				})
+				
+				$('.removeThemeRepoButton').mouseup(gsFluid.ui.removeRepoClick);
 				
 				$('.gsFluid_theme > a').click( gsFluid.ui.selectThemeClick );
 			},
@@ -1012,10 +1108,13 @@ gsFluid = {			// global object
 				return html;
 			},
 			listForRepo: function( repo ){
-				var html = '<div class="lightbox_content_block separatedContent listForRepo '+repo.shortname+'UI"> 	<div class="shadow"></div>';
-				html +=	'<div class="themeListHeader">';
-				html +=		'<h3>'+repo.fullname+'</h3>' + gsFluid.ui.drawButton('Remove', ['removeThemeRepoButton', repo.name], 3);
-				html +=		'<h6>'+repo.url+' ' + '</h6>';
+				var removeButton, html = '<div class="lightbox_content_block separatedContent listForRepo '+repo.shortname+'UI"> 	<div class="shadow"></div>';
+				if (!repo.isDefault) {
+					removeButton = gsFluid.ui.drawButton('Remove', ['removeThemeRepoButton', repo.name], 3);
+				} else {removeButton = '';}
+				html +=	'<div class="gsSubheader">';
+				html +=		'<h3>'+ repo.fullname + '<em>'+repo.shortname+'</em></h3>' + removeButton;
+				html +=		'<h6>'+ repo.url +'</h6>';
 				html += '</div>';
 				html += '<ul>';
 				for (theme in repo.themes) {
@@ -1066,10 +1165,10 @@ gsFluid = {			// global object
 		pref: {
 			p: false, // stores the active preference hash
 			load: function(){
-				// TODO load JSON cookie to pref.p
 				var p = $.cookie('gsFluidPreferences');
 				p = ( (p === null) || (p === 'false') ) ? "{}" : p;
 				gsFluid.pref.p = JSON.parse(p);
+				gsFluid.debug("Loaded prefs: ", gsFluid.pref.p)
 			},
 			generateUUID: function(){
 				return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -1078,8 +1177,8 @@ gsFluid = {			// global object
 				}).toUpperCase();
 			},
 			save: function(){
-				// TODO save pref.p to JSON cookie
 				$.cookie('gsFluidPreferences', JSON.stringify(gsFluid.pref.p) );
+				gsFluid.debug("Saved prefs: ", gsFluid.pref.p);
 			},
 			clear: function( wipeAll ){
 				gsFluid.pref.p = false;
@@ -1116,7 +1215,8 @@ gsFluid = {			// global object
 					
 					return true;
 				} else {
-					console.log("Pref script load failed");
+					var dependencyError = {error: 'Dependency Error', required: 'jquery.cookie.js', url: gsFluid.resources.r+'js/jquerycookie.js', failure: req}
+					throw(dependencyError);
 					return false;
 				}
 				// read preference object from JSON cookie
@@ -1144,6 +1244,7 @@ gsFluid = {			// global object
 				var u = gsFluid.platform.user;
 				u.timesLoaded = gsFluid.pref.p.timesLoaded;
 				u.lastLoaded = new Date();
+				u.version = gsFluid.version;
 				
 				// if we coudn't load genuine UUID from .uuid.js use javascript uuid
 				if( !u.uuid ) { 
@@ -1156,8 +1257,35 @@ gsFluid = {			// global object
 					url: 'http://jake.teton-landis.org/projects/gsFluid/stat/stat.php',
 					data: JSON.stringify(u),
 					dataType: 'json',
-					success: function(){ console.log("registered user") }
+					success: function(){ gsFluid.debug("registered user ", gsFluid.platform.user) }
 					});
+			},
+			checkForUpdates: function( url ) {
+				try {
+					var req = get(url);
+					if (req) {
+						var version = JSON.parse(req.responseText);
+						gsFluid.platform.version = version;
+						if (version.latest > gsFluid.version) {
+							// We're out of date
+							console.log("Version "+version.latest+" of Grooveshark Desktop is now availible \n(You have version "+gsFluid.version+")");
+							console.log("Changelog: "+version.changelog);
+							
+							var html = '<div class="lightbox_content_block">';
+							html += '<p>Version '+version.latest+' of Grooveshark Desktop is now availible \n(You have version '+gsFluid.version+')</p>';
+							html += '<p>Visit the <a href="http://jake.teton-landis.org/projects/gsFluid/">Grooveshark Desktop webpage</a> for more information</p>';
+							html += '</div> <div class="lightbox_content_block seperatedContent"> <div class="shadow"></div>'
+							html += '<div class="gsSubheader"><h3>What\'s New</h3> <div class="clear"></div> </div>';
+							html += '<p>'+ version.changelog + '</p>';
+							html += '</div>';
+							gsFluid.lightbox.show(html, 'Grooveshark Desktop Update Availible');
+						} else {
+							gsFluid.debug('No updates availible');
+						}
+					}
+				} catch (err) {
+					gsFluid.debug("Version check failed with error ", err);
+				}
 			},
 			init: function(){
 				window.fluid.include(window.fluid.userscriptPath+'.uuid.js');
@@ -1184,7 +1312,7 @@ gsFluid = {			// global object
 		
 		init: function() {
 			// TODO rewrite init to load preferences first
-			console.log("Initializing gsFluid, the unofficial Grooveshark Desktop client \n Copyright (c) 2011 Jake Teton-Landis <just.1.jake@gmail.com> \n version:", gsFluid.version);
+			console.log("Initializing gsFluid, the unofficial Grooveshark Desktop client \nCopyright (c) 2011 Jake Teton-Landis <just.1.jake@gmail.com> \nversion:", gsFluid.version);
 			try {
 				console.log("Registering platform..."); // includes gsFluid.pref.init();
 				gsFluid.platform.init();
@@ -1223,8 +1351,8 @@ gsFluid = {			// global object
 				console.log("Initializing gsFluid.ui");
 				gsFluid.ui.init();
 				
-				// console.log("script Path:", window.fluid.userscriptPath);
-				// console.log("app path:", window.fluid.applicationPath);
+				console.log("Checking for updates...")
+				gsFluid.platform.checkForUpdates('http://jake.teton-landis.org/projects/gsFluid/resources/version.json')
 				
 				console.log("gsFluid loaded successfully!");
 				return true;
