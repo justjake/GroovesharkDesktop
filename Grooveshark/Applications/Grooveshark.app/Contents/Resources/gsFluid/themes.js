@@ -1,6 +1,7 @@
 {
 	"fullname": "Default Theme Repository",
 	"shortname": "prod",
+	"gsFluidMinVersion": 0.05,
 	"path": "http://jake.teton-landis.org/projects/gsFluid/resources/themes/",
 	"themes": {
 		"microController": {
@@ -12,7 +13,7 @@
 			"preview":	"preview.png",
 			"shortname":	"microController",
 			
-			"version": 	0.8,
+			"version": 	0.9,
 			"gsFluidMinVersion": 0.04
 		}
 	}

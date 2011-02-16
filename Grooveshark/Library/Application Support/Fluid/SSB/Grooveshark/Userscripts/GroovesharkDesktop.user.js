@@ -12,12 +12,12 @@ handle music queue because grooveshark relies on window.unload
 button to clear settings
 alwasy up-to-date version where majority of app is added via jsonp (<script>)? -> later, for those who want it
 	Multiplatform will be like this only, updating Prisms looks like a bitch
-multi-repo use *DONE*
-UI for adding repos *DONE*
+multi-repo use 					*DONE*
+UI for adding repos 			*DONE*
 make app display spash screen until my userscript is loaded
 Re-premium on login/logout
 make cursor a mouse pointer when dragging, its a text selector right now
-make sure load order is good *DONE*
+make sure load order is good 	*DONE*
 make this shit cross-platform
 */
 
@@ -1004,9 +1004,9 @@ gsFluid = {			// global object
 		}, //end gsFluid.lightbox
 		ui: {
 			init: function() {
-				$('<li class="last"><button class="btn btn_style1" id="gsFluid_theme_button"><span class="label">Mini Themes</span></button></li>').addClass('.gsFluidButton').appendTo( $('#userOptions') );
+				$('<li class="last">'+gsFluid.ui.drawButton( 'Settings', ['gsFluid_settings_button'], 1)+'</li>').addClass('.gsFluidButton').appendTo( $('#userOptions') );
 				$('li.locales').removeClass('last');
-				gsFluid.ui.themebutton = $("#gsFluid_theme_button").mouseup( gsFluid.ui.themeButtonClick );
+				gsFluid.ui.settingsButton = $(".gsFluid_settings_button").mouseup( gsFluid.ui.settingsButtonClick );
 			},
 			selectThemeClick: function(e) {
 				var chosen = {}
@@ -1037,8 +1037,8 @@ gsFluid = {			// global object
 				$(this).parent().parent().remove();
 				GS.lightbox.positionLightbox();
 			},
-			themeButtonClick: function(e){
-				gsFluid.lightbox.show( gsFluid.ui.settingsHTML(), "Desktop Settings" );
+			settingsButtonClick: function(e){
+				gsFluid.lightbox.show( gsFluid.ui.settingsHTML(), "Grooveshark Desktop Settings" );
 				
 				// remove 'Remove' button from topmost 
 				

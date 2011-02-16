@@ -8,8 +8,23 @@
 /* fixing the lightbox so we can drag window */
 #header {
 	z-index: 9999999;
+	cursor: default;
 }
 
+/* Native-looking mouse while dragging */
+#header:active {
+	cursor: default;
+}
+
+#header:active * {
+	cursor: default;
+}
+
+#glassCeiling {
+	cursor: default;
+} #glassCeiling:active {
+	cursor: default;
+}
 
 /* Lightbox interface */
 #lightbox_wrapper .gsFluid .separatedContent {display: block; position: relative; margin: 0; padding: 10px 15px 15px; background-color: #f5f5f5;}
