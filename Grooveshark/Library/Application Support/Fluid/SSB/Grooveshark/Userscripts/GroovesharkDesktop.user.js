@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Grooveshark Desktop
-// @version		0.044
+// @version		0.05
 // @namespace   http://fluidapp.com
 // @description The unofficial Grooveshark desktop client, built withg Fluid. Features dock control, badges for social notifications, premium mode, and Growl notifications.
 // @include     http://listen.grooveshark.com/*
@@ -69,7 +69,7 @@ console.log("writing gsFluid");
 /** @namespace */
 gsFluid = {			// global object
 		/** @constant */
-		version: 0.049,
+		version: 0.05,
 		// hasInitiated: false,
 		/** @namespace Contains functions for determining the state of Grooveshark */
 		player: {		// pause play prev next
@@ -331,9 +331,11 @@ gsFluid = {			// global object
 					GS.Controllers.Lightbox.ThemesController.prototype["a.theme click"] = gsFluid.native.theme.n.themeButtonClick;
 				}
 			},	// end gsFluid.native.theme
-			auth: {		// make sure we're always premium mode.
+			auth: {		// make sure we're always premium mode. // @TODO: Get onLogin and onLogout events working!
 				 _loginSuccess: function (b,c,d,f) {
-					if (f && f.userID == 0 || ! f) { return this._loginFailed(b, d, f); }
+					if (f && f.userID == 0 || ! f) { 
+						return this._loginFailed(b, d, f); 
+					}
 					console.log("login.success", f);
 					f.authType = b;
 					b == "reauth" && f.userID === GS.user.UserID || GS.service.getUserByID(f.userID, this.callback(this._updateUser, f));
@@ -673,9 +675,10 @@ gsFluid = {			// global object
 			active:		false,	// is the theme active?
 			repo:		false,	// stores theme data downloaded from gsFluid.resources.r/themes/list.json,
 								// or the themes themselves after downloading
-			get: function( themeRef ) { // themeRefs are the info stubs in repositories
+			get: function( themeRef, repoOrName ) { // themeRefs are the info stubs in repositories
+				var repoName = gsFluid.theme.repoName( repoOrName );
 				if ( gsFluid.theme.validateRef(themeRef) ){
-					var i, req, imgurls, theme, themePath = gsFluid.theme.repo.path + themeRef.shortname + '/';
+					var i, req, imgurls, theme, themePath = gsFluid.theme.repo[repoName].path + themeRef.shortname + '/';
 					// load base theme.js file
 					req = get(themePath + 'theme.js');
 					// themes aren't strict JSON yet so we can't use this
@@ -709,7 +712,7 @@ gsFluid = {			// global object
 					// set resources path
 					// validate
 					if ( gsFluid.theme.validate(theme) ){
-						gsFluid.theme.repo.themes[themeRef.shortname] = theme;
+						gsFluid.theme.repo[repoName].themes[themeRef.shortname] = theme;
 						return theme;
 					} else {
 						console.log("Bad theme", theme);
@@ -728,14 +731,16 @@ gsFluid = {			// global object
 				console.log("Attempting to retrieve theme repo at", url);
 				var req = get(url);
 				if (req) {
-					var data = JSON.parse(req.responseText);
-					if (typeof data === 'object' && data.path && data.name && (Object.size(data.themes) > 0) ) {
+					var repo = JSON.parse(req.responseText);
+					if (gsFluid.theme.validateRepo(repo) ) {
+						repo.url = url;
 						// we need a no-theme theme in the repo so we can select to not use a theme.
-						data.themes["false"] = false;
-						gsFluid.theme.repo = data;
-						return true;
+						repo.themes["false"] = false;
+						// yeehaw multiple repos by name 
+						gsFluid.theme.repo[repo.shortname] = repo;
+						return repo;
 					} else {
-						console.log(data, "is an invalid theme repo");
+						console.log(repo, "is an invalid theme repo");
 						return false;
 					}
 				} else {
@@ -791,6 +796,29 @@ gsFluid = {			// global object
 					return false;
 				}
 				return false;
+			},
+			validateRepo: function( repo ) {
+				try {
+					if (
+						repo.path && 
+						repo.fullname && 
+						repo.shortname &&
+						(Object.size(repo.themes) > 0)
+						) {
+							return true;
+						}
+				} catch (err) {
+					console.log("repo", repo, "failed validation with error", err);
+					return false;
+				}
+				return false;
+			},
+			repoName: function( r ) {
+				try {
+					return (r.shortname) ? r.shortname : r;
+				} catch (err) {
+					return false;
+				}
 			},
 			apply: function( theme ){
 				// validate theme
@@ -850,16 +878,21 @@ gsFluid = {			// global object
 				});   
 				gsFluid.theme.active = false;
 			}, // end remove
-			select: function( themeOrRef ) {
+			select: function( themeOrRef, repoOrName ) {
+				var repoName = gsFluid.theme.repoName( repoOrName ), chosen = {};
 				if (themeOrRef) {
 					if ( gsFluid.theme.validateRef(themeOrRef) ) {
-						gsFluid.theme.selected = gsFluid.theme.get(themeOrRef);
-						gsFluid.pref.p.themeShortname = gsFluid.theme.selected.metadata.shortname;
+						gsFluid.theme.selected = gsFluid.theme.get(themeOrRef, repoOrName );
+						chosen.name = gsFluid.theme.selected.metadata.shortname;
+						chosen.repo = repoName;
+						gsFluid.pref.p.chosenTheme = chosen;
 						gsFluid.pref.save();
 						return true;
 					} else if ( gsFluid.theme.validate(themeOrRef) ) {
 						gsFluid.theme.selected = themeOrRef;
-						gsFluid.pref.p.themeShortname = gsFluid.theme.selected.metadata.shortname;
+						chosen.name = gsFluid.theme.selected.metadata.shortname;
+						chosen.repo = repoName;
+						gsFluid.pref.p.chosenTheme = chosen;
 						gsFluid.pref.save();
 						return true;
 					}
@@ -868,13 +901,16 @@ gsFluid = {			// global object
 				} else {
 					console.log("Clearing theme selection");
 					gsFluid.theme.selected = false;
-					gsFluid.pref.p.themeShortname = false;
+					gsFluid.pref.p.chosenTheme = false;
 				}
 			}, // end select
 			init: function() {
-				gsFluid.theme.getRepo( gsFluid.resources.r+'themes.js' );
-				if (gsFluid.pref.p.themeShortname) {
-					gsFluid.theme.select( gsFluid.theme.repo.themes[gsFluid.pref.p.themeShortname]);
+				// we need repo be an object
+				gsFluid.theme.repo = {};
+				// get the default themes list ALWAYS
+				gsFluid.theme.getRepo( gsFluid.resources.r+'devthemes.js' );
+				if (gsFluid.pref.p.chosenTheme) { 
+					gsFluid.theme.select( gsFluid.theme.repo[gsFluid.pref.p.chosenTheme.repo].themes[gsFluid.pref.p.chosenTheme.name], gsFluid.pref.p.chosenTheme.repo);
 				}
 			} // end init
 		}, //end gsFluid.theme
@@ -911,21 +947,81 @@ gsFluid = {			// global object
 				$('li.locales').removeClass('last');
 				gsFluid.ui.themebutton = $("#gsFluid_theme_button").mouseup( gsFluid.ui.themeButtonClick );
 			},
+			selectThemeClick: function(e) {
+				var chosen = {}
+				chosen.name = $(this).attr('rel').split(" in ")[0];
+				chosen.repo = $(this).attr('rel').split(" in ")[1];
+				console.log("Chosen: ", chosen);
+				$(this).parent().siblings().children().removeClass('selected');
+				$(this).addClass('selected');
+				gsFluid.theme.select( gsFluid.theme.repo[chosen.repo].themes[chosen.name], chosen.repo );
+			},
 			themeButtonClick: function(e){
-				gsFluid.lightbox.show( gsFluid.ui.listForRepo(gsFluid.theme.repo), "Grooveshark Destkop Mini" );
-				$('.gsFluid_theme > a').click(function(){
-					$(this).parent().siblings().children().removeClass('selected');
-					$(this).addClass('selected');
-					gsFluid.theme.select( gsFluid.theme.repo.themes[$(this).attr('rel')] );
-				});
+				gsFluid.lightbox.show( gsFluid.ui.settingsHTML(), "Desktop Settings" );
+				
+				$('.addRepoButton').mouseup(function(e){
+					var url = $('#addRepoForm .gsTextfield input').val();
+					var repo = gsFluid.theme.getRepo(url);
+					if (repo) {
+						// SUCCESS! Refresh UI HTML
+						var newList = gsFluid.ui.listForRepo(repo);
+						$('.listForRepo').last().after(newList);
+						$('.'+repo.shortname+'UI .gsFluid_theme > a').click( gsFluid.ui.selectThemeClick );
+						$('#addRepoForm .gsTextfield input').val();
+					} else {
+						// Failure. Notify failure.
+						$('.listForRepo').last().after('Shit son, that didn\'t work');
+					}
+				})
+				
+				$('.gsFluid_theme > a').click( gsFluid.ui.selectThemeClick );
+			},
+			settingsHTML: function() {
+				var html = "";
+				html += '<div class="sectionHeader">';
+				html +=		'<h3>Themes</h3>';
+				html += '</div>';
+				for (r in gsFluid.theme.repo) {
+					if (gsFluid.theme.repo.hasOwnProperty(r)) {
+						html+= gsFluid.ui.listForRepo(gsFluid.theme.repo[r]);
+					}
+				}
+				html += gsFluid.ui.addRepoForm();
+				return html;
+			},
+			drawButton: function( text, classes, style ) {
+				style = (style === undefined ) ? '4' : style;
+				classes = (classes === undefined ) ? [] : classes;
+				var r = '<button class="btn_style'+style+' '+ classes.join(" ") +'"> <div> <span>'+ text +'</span> </div> </button>';
+				return r;
+			},
+			drawTextfield: function( name, tooltip, classes, defaultvalue ) {
+				defaultvalue = ( defaultvalue === undefined ) ? '' : defaultvalue;
+				tooltip = ( tooltip === undefined ) ? '' : tooltip;
+				classes = ( classes === undefined ) ? [] : classes;
+				
+				var html = "";
+				html +=	'<div class="field '+ classes.join(" ") +'">';
+				html += 	'<div class="input_wrapper">';
+				html +=			'<div class="cap">';
+				html +=				'<input title="'+tooltip+'" type="text" name="'+ name +'" value="'+ defaultvalue +'" />';
+				html +=			'</div>';
+				html +=		'</div>';
+				html +=	'</div>';
+				
+				return html;
 			},
 			listForRepo: function( repo ){
-				var html = '<div class="lightbox_content_block"> 	<p>Theme selections will be saved via a cookie. Press the minimize button to activate the microcontroller.</p> 	<div class="clear noHeight"></div> </div> <div class="lightbox_content_block separatedContent"> 	<div class="shadow"></div>';
+				var html = '<div class="lightbox_content_block separatedContent listForRepo '+repo.shortname+'UI"> 	<div class="shadow"></div>';
+				html +=	'<div class="themeListHeader">';
+				html +=		'<h3>'+repo.fullname+'</h3>' + gsFluid.ui.drawButton('Remove', ['removeThemeRepoButton', repo.name], 3);
+				html +=		'<h6>'+repo.url+' ' + '</h6>';
+				html += '</div>';
 				html += '<ul>';
 				for (theme in repo.themes) {
 					if (gsFluid.theme.validateRef(repo.themes[theme]) ) {
 						html+='<li class="gsFluid_theme">';
-						html+=	'<a rel="'+repo.themes[theme].shortname+'">';
+						html+=	'<a rel="'+repo.themes[theme].shortname+' in '+repo.shortname+'">';
 						html+=		'<img src="'+repo.path+repo.themes[theme].shortname+'/'+repo.themes[theme].preview+'" alt="'+repo.themes[theme].fullname+'" />';
 						html+=		'<div class="gsFluid_name">'+repo.themes[theme].fullname+'</div>';
 						html+=		'<div class="gsFluid_author">'+repo.themes[theme].author+'</div>';
@@ -934,9 +1030,9 @@ gsFluid = {			// global object
 					} else if (gsFluid.theme.validate(repo.themes[theme]) ) {
 						html+='<li class="gsFluid_theme">';										// this theme is selected! make it look like it!
 						try {
-							html+=	'<a rel="'+repo.themes[theme].metadata.shortname+'" class="' + ( (gsFluid.theme.selected.metadata.shortname == repo.themes[theme].metadata.shortname) ? "selected" : "") + '">';
+							html+=	'<a rel="'+repo.themes[theme].metadata.shortname+' in '+repo.shortname+'" class="' + ( (gsFluid.theme.selected.metadata.shortname == repo.themes[theme].metadata.shortname) ? "selected" : "") + '">';
 						} catch(er) {
-							html+=	'<a rel="'+repo.themes[theme].metadata.shortname+'" >';
+							html+=	'<a rel="'+repo.themes[theme].metadata.shortname+' in '+repo.shortname+'" >';
 						}
 						html+=		'<img src="'+repo.path+repo.themes[theme].metadata.shortname+'/'+repo.themes[theme].metadata.preview+'" alt="'+repo.themes[theme].fullname+'" />';
 						html+=		'<div class="gsFluid_name">'+repo.themes[theme].metadata.fullname+'</div>';
@@ -946,13 +1042,23 @@ gsFluid = {			// global object
 					}
 				}
 				html+='<li class="gsFluid_theme">';
-				html+=	'<a rel="'+false+'" class="'+( (gsFluid.theme.selected === false) ? "selected" : "")+'">';
+				html+=	'<a rel="'+false+' in '+ repo.shortname + '" class="'+( (gsFluid.theme.selected === false) ? "selected" : "")+'">';
 				html+=		'<img src="'+gsFluid.resources.r+'img/noMinTheme.png" alt="Standard minify behavior" />';
 				html+=		'<div class="gsFluid_name">No Theme</div>';
 				html+=	'</a>';
 				html+='</li>';
 				html += '</ul>';
 				html += '<div class="clear noHeight"></div></div>';
+				return html;
+			},
+			addRepoForm: function() {
+				var html = '<div class="lightbox_content_block separatedContent"> <div class="shadow"></div>';
+				html += '<div id="addRepoForm">';
+				html +=		gsFluid.ui.drawTextfield( 'repoURL', 'Theme repository URL', ['gsTextfield'] );
+				html +=		gsFluid.ui.drawButton( 'Add Repo', ['addRepoButton'] );
+				html += '</div>';
+				html += '<div class="clear"> </div>';
+				
 				return html;
 			}
 		}, // WHY SO BROKEN

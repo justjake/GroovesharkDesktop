@@ -1,5 +1,6 @@
 {
-	"name": "Default Theme Repository",
+	"fullname": "Default Theme Repository",
+	"shortname": "prod",
 	"path": "http://jake.teton-landis.org/projects/gsFluid/resources/themes/",
 	"themes": {
 		"microController": {
