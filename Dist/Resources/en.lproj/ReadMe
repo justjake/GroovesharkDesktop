@@ -10,7 +10,7 @@
 This installer package will overwrite both the core userscript and the preference file used by the Grooveshark desktop application. Please back up your preferences file and/or userscript if you have made valuable changes to them!\
 \
 Preference file:\
-~/Library/Preferences/com.fluidapp.FluidInstance.Grooveshark\
+~/Library/Preferences/com.fluidapp.FluidInstance.Grooveshark.plist\
 \
 Userscript:\
 ~/Library/Application Support/Fluid/SSB/Grooveshark/Userscripts/GroovesharkDesktop.user.js\

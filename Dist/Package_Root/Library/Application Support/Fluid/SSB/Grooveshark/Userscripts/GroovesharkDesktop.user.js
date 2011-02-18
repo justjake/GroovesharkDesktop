@@ -77,7 +77,7 @@ gsFluid = {			// global object
 		/** @constant */
 		version: 0.05,
 		log: undefined,
-		devmode: true, // @DEVMODE
+		devmode: false, // @DEVMODE
 		debug: function() {
 			// unlimited arguments
 			

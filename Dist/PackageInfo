@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<pkg-info format-version="2" identifier="org.teton-landis.jake.groovesharkDestktop.Grooveshark.pkg" version="1.4" install-location="/" auth="none">
+    <scripts>
+		<postinstall file="./postinstall"/>
+        <postinstall file="./postflight"/>
+    </scripts>
+    <bundle id="com.fluidapp.FluidInstance.Grooveshark" CFBundleIdentifier="com.fluidapp.FluidInstance.Grooveshark" path="./Applications/Grooveshark.app" CFBundleVersion="0.9.6">
+        <bundle id="com.growl.growlframework" CFBundleIdentifier="com.growl.growlframework" path="./Contents/Frameworks/Growl.framework" CFBundleVersion="1.1.4"/>
+        <bundle id="com.omnigroup.OmniAppKit" CFBundleIdentifier="com.omnigroup.OmniAppKit" path="./Contents/Frameworks/OmniAppKit.framework" CFBundleVersion="2004A"/>
+        <bundle id="com.omnigroup.framework.OmniBase" CFBundleIdentifier="com.omnigroup.framework.OmniBase" path="./Contents/Frameworks/OmniBase.framework" CFBundleVersion="2001A"/>
+        <bundle id="com.omnigroup.framework.OmniFoundation" CFBundleIdentifier="com.omnigroup.framework.OmniFoundation" path="./Contents/Frameworks/OmniFoundation.framework" CFBundleVersion="2001A"/>
+        <bundle id="org.andymatuschak.Sparkle" CFBundleIdentifier="org.andymatuschak.Sparkle" path="./Contents/Frameworks/Sparkle.framework" CFBundleVersion="1.1"/>
+        <bundle id="TDParseKit" CFBundleIdentifier="TDParseKit" path="./Contents/Frameworks/TDParseKit.framework" CFBundleVersion="1.2b"/>
+        <bundle id="com.fluidapp.BrowserBrowserPlugIn" CFBundleIdentifier="com.fluidapp.BrowserBrowserPlugIn" path="./Contents/PlugIns/BrowsaBrowsa.fluidplugin" CFBundleVersion="1.4"/>
+        <bundle id="com.cruzapp.TDWebThumbnail" CFBundleIdentifier="com.cruzapp.TDWebThumbnail" path="./Contents/PlugIns/TDWebThumbnail.webplugin" CFBundleVersion="1.1"/>
+        <bundle id="com.fluidapp.ThumbnailPlugIn" CFBundleIdentifier="com.fluidapp.ThumbnailPlugIn" path="./Contents/PlugIns/Thumbnail.fluidplugin" CFBundleVersion="1.3.6"/>
+    </bundle>
+    <bundle id="com.azinman.MediaKeysPlugin" CFBundleIdentifier="com.azinman.MediaKeysPlugin" path="./Library/Application Support/Fluid/PlugIns/MediaKeysPlugin.fluidplugin" CFBundleVersion="1.0"/>
+    <bundle-version>
+        <bundle id="com.fluidapp.FluidInstance.Grooveshark"/>
+        <bundle id="com.growl.growlframework"/>
+        <bundle id="com.omnigroup.OmniAppKit"/>
+        <bundle id="com.omnigroup.framework.OmniBase"/>
+        <bundle id="com.omnigroup.framework.OmniFoundation"/>
+        <bundle id="org.andymatuschak.Sparkle"/>
+        <bundle id="TDParseKit"/>
+        <bundle id="com.fluidapp.BrowserBrowserPlugIn"/>
+        <bundle id="com.cruzapp.TDWebThumbnail"/>
+        <bundle id="com.fluidapp.ThumbnailPlugIn"/>
+        <bundle id="com.azinman.MediaKeysPlugin"/>
+    </bundle-version>
+</pkg-info>

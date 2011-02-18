@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-script minSpecVersion="1.000000">
+    <title>Grooveshark Destktop</title>
+    <options customize="never" allow-external-scripts="no"/>
+    <domains enable_currentUserHome="true"/>
+    <background file="background" alignment="center" scaling="tofit"/>
+    <welcome file="Welcome.rtfd"/>
+    <readme file="ReadMe"/>
+    <license file="License"/>
+    <choices-outline>
+        <line choice="choice1"/>
+    </choices-outline>
+    <choice id="choice1" title="Grooveshark Desktop">
+        <pkg-ref id="org.teton-landis.jake.groovesharkDestktop.Grooveshark.pkg"/>
+    </choice>
+    <pkg-ref id="org.teton-landis.jake.groovesharkDestktop.Grooveshark.pkg" installKBytes="12260" version="1.4">#grooveshark.pkg</pkg-ref>
+</installer-script>
