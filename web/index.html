@@ -93,6 +93,15 @@ Don't judge me.
 		<h2>changelog</h2>     
 		<p>
 			<ul>
+				<li>0.05
+					<ul>
+						<li>Preferences now stored online instead of in cookies, as cookies seem unreliable</li>
+						<li>New miniController theme repository format - My repos will no longer work in 0.04</li>
+						<li>Update availability check</li>
+						<li>Theme repository interface. Look at Grooveshark.app/Contents/Resources/gsFluid/ for the default (example) repo and themes.</li>
+						<li>Slight improvements to user interface code</li>
+					</ul>
+				</li>
 				<li>0.04
 					<ul>
 						<li>miniController - fully customizable.</li>
@@ -135,6 +144,14 @@ Don't judge me.
 		<h2>known issues</h2>
 		<p>
 			<ul>
+				<li>0.05
+					<ul>
+						<li>Trying to select language or log out when Settings lightbox is open scrambles lightbox queuing. Don't do it!</li>
+						<li>Changing login status necessitates reload of Grooveshark Desktop</li>
+						<li>Cookie storage is broken for the application. Cookies are erased on quit. This fandangoes Grooveshark's attempt to use local storage.</li>
+						<li>Application loading may be slow while requesting preferences from jake.teton-landis.org</li>
+					</ul>
+				</li>
 				<li>
 					0.04
 					<ul>
@@ -165,13 +182,17 @@ Don't judge me.
 		</p>          
 		<h2>Notes</h2>
 		<p>
+			Preferences are now stored on my server at http://jake.teton-landis.org. If you want to clear your preferences, run the following commands in the javascript console (accessed via Window → Show Error Console...)
+<code><pre>gsFluid.pref.clear()
+gsFluid.pref.save()</pre></code>
+		</p>
+		<p>
 			Some visual resources will be retrieved from jake.teton-landis.org
 		</p>
 		<p>
 			As Grooveshark will change their application code without notice, I'm abstracting some important functionality, like player control, to provide a stable API for possible remote authors, if I ever get themes off the ground.
         </p><p>
 			If you want to hack on this script, I'd recommend downloading a copy of Grooveshark's app.js file. You can use Opera 9.27 and http://www.howtocreate.co.uk/tutorials/jsexamples/JSTidy.html to tidy up the code.
-        </p><p>
 			Unfortunately, core.js does not run in Opera 9.27 so that's too hard to deal with. As such, all Grooveshark features dealt with in core.js will remain (mostly) untampered with.
 		</p>
 		

@@ -13,5 +13,5 @@ if [ ! -f "$DESTPATH" ]
 fi
 
 # reveal grooveshark
-RESULT=`/usr/bin/osascript -e "tell application \"Finder\" to reveal POSIX file \"$HOME/Applications/Grooveshark.app\""`
+RESULT=`/usr/bin/osascript -e "tell application \"Finder\" to reveal POSIX file \"$HOME/Applications/Grooveshark.app\"" 2>/dev/null`
 exit 0

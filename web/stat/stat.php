@@ -29,15 +29,27 @@ function writeUser( $user ) {
 	} 
 }
 
+function userPrefsForUUID( $uuid ) {
+	global $store;
+	if ($uuid) {
+		return $store["users"][ $uuid ]["preferences"];
+	}
+}
+
 function saveStore() {
 	global $store;
 	file_put_contents('stat.json', json_encode($store));
 }
 
 //writeUser( $dummyUser );
-writeUser( $incoming );
-saveStore();
+if ($incoming) {
+	writeUser( $incoming );
+	saveStore();
+	output( false );
+}
 
-output( false );
+// if (isset($_GET['uuid']) && $_GET['uuid'] != "") {
+//   $navcount = $_GET['navcount'];
+// } else { $navcount = 5.0; } // Default value
 
 ?>

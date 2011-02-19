@@ -75,16 +75,20 @@ console.log("writing gsFluid");
 /** @namespace */
 gsFluid = {			// global object
 		/** @constant */
-		version: 0.05,
+		version: 0.051,
 		log: undefined,
 		devmode: false, // @DEVMODE
 		debug: function() {
 			// unlimited arguments
-			
+			// new array
+			var arg = []
+			for (var i=0; i < arguments.length; i++) {
+				arg.push(arguments[i])
+			};
 			gsFluid.log = gsFluid.log || [];
-			gsFluid.log.push(arguments);
+			gsFluid.log.push(arg);
 			if (gsFluid.devmode == true ) {
-				console.log.apply( console, arguments );
+				console.log.apply( console, arg );
 			}
 		},
 		// hasInitiated: false,
@@ -347,8 +351,8 @@ gsFluid = {			// global object
 				set: function(themeID) {
 					gsFluid.debug("Setting theme from gsFluid");
 					GS.theme.setCurrentTheme(themeID, true, true);
-					//@ TODO: save theme to preferences
 					gsFluid.pref.p.nativeThemeID = themeID;
+					gsFluid.pref.save();
 				},
 				current: function(){
 					// Returns the whole theme object
@@ -398,8 +402,8 @@ gsFluid = {			// global object
 				}
 			},
 			init: function() {
-				gsFluid.native.theme.init();
-				gsFluid.native.lightbox.init();
+				 gsFluid.native.theme.init();
+				 gsFluid.native.lightbox.init();
 				//@ TODO: needs fixing
 //				gsFluid.native.auth.init();
 			}
@@ -970,7 +974,9 @@ gsFluid = {			// global object
 				gsFluid.theme.getRepo( gsFluid.resources.r+ def, true );
 				
 				if (gsFluid.pref.p.chosenTheme) { 
-					gsFluid.theme.select( gsFluid.theme.repo[gsFluid.pref.p.chosenTheme.repo].themes[gsFluid.pref.p.chosenTheme.name], gsFluid.pref.p.chosenTheme.repo);
+					if (gsFluid.theme.repo[gsFluid.pref.p.chosenTheme.repo]) {
+						gsFluid.theme.select( gsFluid.theme.repo[gsFluid.pref.p.chosenTheme.repo].themes[gsFluid.pref.p.chosenTheme.name], gsFluid.pref.p.chosenTheme.repo);
+					}
 				}
 			} // end init
 		}, //end gsFluid.theme
@@ -997,7 +1003,7 @@ gsFluid = {			// global object
 				gsFluid.lightbox.el.content.empty();
 			},
 			init: function(){
-				$(gsFluid.lightbox.lbcontainer).prependTo( $('#lightbox') );
+				$('#lightbox > .themes').after( $(gsFluid.lightbox.lbcontainer) );
 				gsFluid.lightbox.el.content = $("#gsFluid_content");
 				gsFluid.lightbox.el.title = $(".lbcontainer.gsFluid .inner h3");
 			}
@@ -1165,8 +1171,20 @@ gsFluid = {			// global object
 		pref: {
 			p: false, // stores the active preference hash
 			load: function(){
-				var p = $.cookie('gsFluidPreferences');
-				p = ( (p === null) || (p === 'false') ) ? "{}" : p;
+				// var p = $.cookie('gsFluidPreferences');
+				var p, url;
+				try {
+					url = 'http://jake.teton-landis.org/projects/gsFluid/stat/prefs.php?uuid='+gsFluid.platform.user.uuid;
+				} catch (err) {
+					gsFluid.debug("Preferences error: you don't have a UUID\n  please re-install Grooveshark Desktop and be sure to run the post-install script");
+				}
+				try {
+					var req = get(url);
+					p = req.responseText;
+				} catch (err) {
+					gsFluid.debug("Preferences error: loading failed: ", err);
+				}
+				p = ( (p === null) || (p === 'false' || p === 'null') ) ? "{}" : p;
 				gsFluid.pref.p = JSON.parse(p);
 				gsFluid.debug("Loaded prefs: ", gsFluid.pref.p)
 			},
@@ -1177,14 +1195,15 @@ gsFluid = {			// global object
 				}).toUpperCase();
 			},
 			save: function(){
-				$.cookie('gsFluidPreferences', JSON.stringify(gsFluid.pref.p) );
+				// $.cookie('gsFluidPreferences', JSON.stringify(gsFluid.pref.p) );
+				gsFluid.platform.register();
 				gsFluid.debug("Saved prefs: ", gsFluid.pref.p);
 			},
 			clear: function( wipeAll ){
 				gsFluid.pref.p = false;
 				if (wipeAll) {
-					// TODO clear preference cookie as well	
-					$.cookie('gsFluidPreferences', null);
+					//$.cookie('gsFluidPreferences', null);
+					gsFluid.pref.save();
 				}
 			},
 			setPreferenceForKey: function( key, value ) {
@@ -1199,19 +1218,27 @@ gsFluid = {			// global object
 				if (req) {
 					$('<script type="text/javascript">'+req.responseText+'</script>').appendTo('head');
 					gsFluid.pref.load();
+					gsFluid.debug('just loaded, prefs are ', gsFluid.pref.p);
 					// garuntee certain values
 					if (gsFluid.pref.p.timesLoaded) {
-						gsFluid.pref.p.timesLoaded++;
-					} else { gsFluid.pref.p.timesLoaded = 1; }
+						gsFluid.debug('Incrememnting timesLoaded, was', gsFluid.pref.p.timesLoaded);
+						gsFluid.pref.p.timesLoaded = gsFluid.pref.p.timesLoaded + 1;
+						gsFluid.debug('Is now', gsFluid.pref.p.timesLoaded);
+					} else { 
+						gsFluid.debug('Never loaded before');
+						gsFluid.pref.p.timesLoaded = 1; 
+					}
 					
 					if (!gsFluid.pref.p.JSuuid) {
+						gsFluid.debug('Making new JSuuid');
 						gsFluid.pref.p.JSuuid = gsFluid.pref.generateUUID();
 					}
 					// save changes now
 					gsFluid.pref.save();
 					
 					// save preferences on close
-					$(window).unload(gsFluid.pref.save);
+					// should be dynamic instead
+					//$(window).unload(gsFluid.pref.save);
 					
 					return true;
 				} else {
@@ -1245,12 +1272,19 @@ gsFluid = {			// global object
 				u.timesLoaded = gsFluid.pref.p.timesLoaded;
 				u.lastLoaded = new Date();
 				u.version = gsFluid.version;
+				try {
+					u.preferences = gsFluid.pref.p;
+				} catch(err) {
+					gsFluid.debug('Platform: error getting pref object: ', err);
+				}
 				
 				// if we coudn't load genuine UUID from .uuid.js use javascript uuid
 				if( !u.uuid ) { 
 					u.uuid = gsFluid.pref.p.JSuuid;
 					u.isJSuuid = true;
 				}
+				
+				console.log('Registering platform ', u);
 				
 				$.ajax({
 					type: 'POST',
@@ -1282,6 +1316,7 @@ gsFluid = {			// global object
 						} else {
 							gsFluid.debug('No updates availible');
 						}
+					return req;
 					}
 				} catch (err) {
 					gsFluid.debug("Version check failed with error ", err);

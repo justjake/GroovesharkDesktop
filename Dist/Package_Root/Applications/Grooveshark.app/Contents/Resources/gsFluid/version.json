@@ -1,4 +1,4 @@
 {
-	"latest": 0.05,
-	"changelog": "Changelog available on website"
+	"latest": 0.051,
+	"changelog": "Moved preferences storage from cookie (which was unreliable) to jake.teton-landis.org"
 }
