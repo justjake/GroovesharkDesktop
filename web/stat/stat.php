@@ -48,8 +48,12 @@ if ($incoming) {
 	output( false );
 }
 
-// if (isset($_GET['uuid']) && $_GET['uuid'] != "") {
-//   $navcount = $_GET['navcount'];
-// } else { $navcount = 5.0; } // Default value
-
+if (isset($_GET['display']) && $_GET['display'] != "") {
+  if ($_GET['display'] == "usercount") {
+    output(false);
+  }
+  if ($_GET['display'] == "dump") {
+    output(true);
+  }
+}
 ?>
