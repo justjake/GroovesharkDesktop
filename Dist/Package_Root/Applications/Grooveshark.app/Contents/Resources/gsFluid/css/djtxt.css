@@ -1,0 +1,389 @@
+#smsdj {
+	background:	-moz-linear-gradient(top,#dcdcdc,#646464);
+	background:	-webkit-gradient(linear,left top,left bottom,from(#c8c8c8),to(#646464));
+	color:	black;
+	font:	normal 20px 'Cabin',Helvetica,Arial,sans-serif;
+	height:	1080px;
+	padding-top:	5px;
+	width:	100%;
+}
+
+#smsdjtitle {
+	color:	white;
+	font:	bold 35px 'Orbitron',Georgia,Times,serif;
+	height:	35px;
+	padding:	5px;
+	text-align:	center;
+	text-shadow:	0 0 8px #000;
+	webkit-text-fill-color:	white;
+	webkit-text-stroke-color:	black;
+	webkit-text-stroke-width:	.50px;
+	width:	100%;
+}
+
+#smsdjinstructions,#smsdjlyrics {
+	background-color:	#222;
+	color:	#fff;
+	margin-left:	auto;
+	margin-right:	auto;
+	moz-border-radius:	10px;
+	moz-box-shadow:	5px 5px 5px rgba(0,0,0,0.5);
+	text-align:	center;
+	webkit-border-radius:	10px;
+	webkit-box-shadow:	5px 5px 5px rgba(0,0,0,0.5);
+	width:	780px;
+}
+
+#smsdjlyrics {
+	height:	150px;
+}
+
+#smsdjlyricsbody {
+	color:	#fdf;
+	font-size:	15px;
+	height:	150px;
+	overflow:	hidden;
+	text-align:	center;
+}
+
+#smsdjlyricscopyright {
+	color:	#DDD;
+	float:	right;
+	font:	normal 10px 'Cabin',Helvetica,Arial,sans-serif;
+	height:	15px;
+	overflow:	hidden;
+	padding-right:	10px;
+	position:	relative;
+	text-align:	right;
+	top:	-15px;
+	width:	200px;
+}
+
+#smsdjlyricscopyright img {
+	display:	none;
+}
+
+#smsdjinstructions strong {
+	color:	#EBE;
+	font-size:	110%;
+}
+
+#smsdjinstructions ol {
+	list-style:	none inside none;
+	margin-left:	25px;
+	moz-border-radius:	10px;
+	padding:	2px 0;
+	webkit-border-radius:	10px;
+}
+
+#smsdjinstructions li {
+	moz-border-radius-bottomright:	10px;
+	moz-border-radius-topright:	10px;
+	padding:	3px 0 3px 55px;
+	webkit-border-bottom-right-radius:	10px;
+	webkit-border-top-right-radius:	10px;
+}
+
+#smsdjinstructions li p {
+	font:	normal 18px 'Cabin',Helvetica,Arial,sans-serif;
+	text-align:	left;
+}
+
+#smsdjinstructions li p.footnote {
+	font-size:	14px;
+}
+
+#smsdjdisabled li p {
+	text-align:	center;
+}
+
+#smsdjdisabled h1 {
+	background-color:	#E8E;
+	font-size:	120%;
+	text-align:	center;
+}
+
+#iconsms {
+	background-image:	url('http://djtxt.me/images/sms.png');
+	background-position:	0 .5em;
+	background-repeat:	no-repeat;
+}
+
+#icontwitter {
+	background-image:	url('http://djtxt.me/images/twitter.png');
+	background-position:	0 0;
+	background-repeat:	no-repeat;
+}
+
+#iconemail {
+	background-image:	url('http://djtxt.me/images/email.png');
+	background-position:	0 .5em;
+	background-repeat:	no-repeat;
+}
+
+#iconinfo {
+	background-image:	url('http://djtxt.me/images/info.png');
+	background-position:	0 2px;
+	background-repeat:	no-repeat;
+}
+
+#smsdjusers {
+	background-color:	#222;
+	color:	#fff;
+	font:	normal 12px 'Cabin',Helvetica,Arial,sans-serif;
+	margin-left:	auto;
+	margin-right:	auto;
+	margin-top:	10px;
+	moz-border-radius:	10px;
+	moz-box-shadow:	5px 5px 5px rgba(0,0,0,0.5);
+	padding:	10px 0;
+	text-align:	center;
+	webkit-border-radius:	10px;
+	webkit-box-shadow:	5px 5px 5px rgba(0,0,0,0.5);
+	width:	780px;
+}
+
+.userlist {
+	font:	normal 14px 'Orbitron',Georgia,Times,serif;
+	text-shadow:	1px 1px 3px #c864c8;
+}
+
+#smsdjplaylist {
+	height:	450px;
+	margin-left:	auto;
+	margin-right:	auto;
+	padding:	5px;
+	padding-top:	8px;
+	width:	1200px;
+}
+
+#smsdj a {
+	color:	#F9F;
+	font-size:	120%;
+	font-weight:	bold;
+	webkit-text-stroke-color:	black;
+	webkit-text-stroke-width:	.25px;
+}
+
+#smsdj a:visited {
+	color:	#E8E;
+}
+
+#smsdj a:hover {
+	color:	#FAF;
+	text-shadow:	1px 1px 3px #f078f0;
+}
+
+#smsdjlogo {
+	height:	80px;
+	left:	5px;
+	overflow:	hidden;
+	position:	absolute;
+	top:	5px;
+	width:	150px;
+}
+
+#smsdjcontrols {
+	background:	#f0f0f0;
+	border-radius:	5px;
+	left:	10px;
+	moz-border-radius:	5px;
+	moz-box-shadow:	inset 0 0 10px rgba(100,100,100,0.8);
+	overflow:	hidden;
+	padding:	2px;
+	position:	absolute;
+	top:	90px;
+	webkit-border-radius:	5px;
+	webkit-box-shadow:	inset 0 0 10px rgba(100,100,100,0.8);
+	width:	140px;
+}
+
+#smsdjcontrols label {
+	font:	normal 14px 'Cabin',Helvetica,Arial,sans-serif;
+	line-height:	16px;
+}
+
+#smsdjfooter {
+	background-color:	#ffff96;
+	bottom:	0;
+	height:	25px;
+	left:	0;
+	position:	fixed;
+	width:	100%;
+}
+
+#smsdjtips {
+	margin:	0 auto;
+	width:	auto;
+}
+
+#smsdjtips ul {
+	text-align:	center;
+}
+
+#smsdjtips li {
+	display:	inline;
+	font-size:	14px;
+	padding:	0 10px;
+}
+
+.djtxt {
+	font-family:	'Orbitron',Georgia,Times,serif;
+	font-weight:	bold;
+	text-shadow:	0 0 2px #000;
+	webkit-text-fill-color:	white;
+	webkit-text-stroke-color:	black;
+	webkit-text-stroke-width:	.50px;
+}
+
+.request {
+	background-color:	#fff;
+	border:	1px solid #000;
+	float:	left;
+	height:	200px;
+	margin:	5px;
+	moz-border-radius:	10px;
+	moz-box-shadow:	5px 5px 5px rgba(0,0,0,0.5);
+	overflow:	hidden;
+	padding:	6px;
+	text-align:	center;
+	webkit-border-radius:	10px;
+	webkit-box-shadow:	5px 5px 5px rgba(0,0,0,0.5);
+	width:	200px;
+}
+
+p.request {
+	line-height:	120%;
+}
+
+.highlight {
+	color:	#F9F;
+	font-size:	110%;
+	font-weight:	bold;
+	webkit-text-stroke-color:	black;
+	webkit-text-stroke-width:	.25px;
+}
+
+.bang {
+	font-family:	Georgia,Times,serif;
+}
+
+.highlightsmall {
+	color:	#F9F;
+	font-size:	130%;
+	font-weight:	bold;
+	webkit-text-stroke-color:	black;
+	webkit-text-stroke-width:	.25px;
+}
+
+.albumcover {
+	border:	1px solid black;
+	display:	block;
+	height:	80px;
+	margin:	0 auto;
+	width:	80px;
+}
+.songname {
+	font:	normal 16px 'Orbitron',Georgia,Times,serif;
+}
+
+.artistname {
+	font-size:	12px;
+}
+.username {
+	font-size:	16px;
+}
+@-webkit-keyframes pulse {
+	from {
+		background-color:	#ffe6ff;
+		webkit-transform:	scale(1.0);
+	}
+	50% {
+		background-color:	#ffd2ff;
+		webkit-transform:	scale(0.95);
+	}
+	to {
+		background-color:	#ffe6ff;
+		webkit-transform:	scale(1.0);
+	}
+}
+.nowplaying {
+	background-color:	#ffd2ff;
+	webkit-animation-duration:	.6s;
+	webkit-animation-iteration-count:	infinite;
+	webkit-animation-name:	pulse;
+}
+#smsdjnotify {
+	color:	white;
+	position:	fixed;
+	right:	10px;
+	top:	10px;
+	width:	200px;
+	z-index:	9999;
+}
+#smsdjnotify>div {
+	cursor:	pointer;
+	margin-bottom:	5px;
+	position:	relative;
+}
+#smsdjnotify .content {
+	margin:	5px 5px 5px 69px;
+}
+#smsdjnotify h2 {
+	font-family:	'Orbitron',Georgia,Times,serif;
+	font-size:	14px;
+	font-weight:	normal;
+	line-height:	16px;
+	margin:	0;
+	padding:	0;
+}
+#smsdjnotify p {
+	font-family:	'Cabin',Helvetica,Arial,sans-serif;
+	font-size:	11px;
+	font-weight:	normal;
+	line-height:	16px;
+	margin:	0;
+	padding-top:	8px;
+}
+#smsdjnotify .icon {
+	background:	transparent url(http://djtxt.me/images/notice.png) no-repeat 0 0;
+	display:	block;
+	height:	48px;
+	left:	10px;
+	position:	absolute;
+	top:	5px;
+	width:	48px;
+	z-index:	1;
+}
+#smsdjnotify .close {
+	background:	none;
+	display:	block;
+	height:	24px;
+	left:	8px;
+	position:	absolute;
+	top:	8px;
+	width:	24px;
+	z-index:	2;
+}
+#smsdjnotify div:hover .close {
+	background:	transparent url(http://djtxt.me/images/close.png) no-repeat 0 0;
+}
+#smsdjnotify .background {
+	background:	#000;
+	border:	3px solid #000;
+	border-radius:	12px;
+	box-shadow:	2px 2px 3px #888;
+	moz-border-radius:	12px;
+	moz-box-shadow:	2px 2px 3px #888;
+	opacity:	.65;
+	webkit-box-shadow:	2px 2px 3px #888;
+}
+#smsdjnotify:hover .background {
+	border-color:	#fff;
+}
+#smsdjnotify .slide .icon {
+	background-image:	url(http://djtxt.me/images/slide.png);
+}
+#smsdjnotify .pushpin .icon {
+	background-image:	url(http://djtxt.me/images/pushpin.png);
+}
