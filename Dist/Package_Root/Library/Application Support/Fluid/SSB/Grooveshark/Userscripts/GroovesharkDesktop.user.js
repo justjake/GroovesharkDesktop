@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        Grooveshark Desktop
-// @version		0.05
+// @version		0.06
 // @namespace   http://fluidapp.com
 // @description The unofficial Grooveshark desktop client, built withg Fluid. Features dock control, badges for social notifications, premium mode, and Growl notifications.
 // @include     http://listen.grooveshark.com/*
@@ -71,13 +71,14 @@ console.log("writing mediaKeysPlugin");
 // Media Key Support
 mediaKeysPlugin = {}; 
 
+
 console.log("writing gsFluid");
 /** @namespace */
 gsFluid = {			// global object
 		/** @constant */
-		version: 0.051,
+		version: 0.06,
 		log: undefined,
-		devmode: false, // @DEVMODE
+		devmode: true, // @DEVMODE
 		debug: function() {
 			// unlimited arguments
 			// new array
@@ -296,7 +297,7 @@ gsFluid = {			// global object
 						GS.lightbox.close(true);
 						gsFluid.lightbox.remove();
 					} else {
-						GS.lightbox.close();	
+						GS.lightbox.close(true);	
 					}		  
 				},
 				positionLightbox: function() {
@@ -322,10 +323,10 @@ gsFluid = {			// global object
 				},
 				init: function() {
 					// replace functions
-					GS.lightbox.positionLightbox = gsFluid.native.lightbox.positionLightbox;
-					GS.Controllers.LightboxController.prototype.positionLightbox = gsFluid.native.lightbox.positionLightbox;
+					//GS.lightbox.positionLightbox = gsFluid.native.lightbox.positionLightbox;
+					//GS.Controllers.LightboxController.prototype.positionLightbox = gsFluid.native.lightbox.positionLightbox;
 					GS.lightbox.open = gsFluid.native.lightbox.open;
-					GS.lightbox.close = gsFluid.native.lightbox.close;
+					//GS.lightbox.close = gsFluid.native.lightbox.close;
 					GS.Controllers.LightboxController.prototype[".close click"] = gsFluid.native.lightbox.closeclick;
 				}
 			},// end gsFluid.native.lightbox
@@ -401,6 +402,29 @@ gsFluid = {			// global object
 					GS.auth._loginFailed = gsFluid.native.auth._loginFailed;
 				}
 			},
+			restoreQueue: { //@WORKINGONIT
+				interval: false,
+				begin: function() {
+					// subscribe doneTrying
+					// set try interval
+					gsFluid.native.restoreQueue.interval = setInterval(gsFluid.native.restoreQueue.attempt, 300);
+					//$.subscribe('gs.player.restorequeue', gsFluid.native.restoreQueue.done);
+					$.subscribe('gs.player.playing',	gsFluid.native.restoreQueue.done);
+					$.subscribe('gs.player.paused',		gsFluid.native.restoreQueue.done);
+					$.subscribe('gs.player.stopped',	gsFluid.native.restoreQueue.done);
+					
+				},
+				attempt: function() {
+					console.log("gsFluid: trying to restore queue");
+					GS.player.restoreQueue();
+				},
+				done: function() {
+					// remove subscription //@TODO
+					// unset try interval
+					gsFluid.debug("Queue restored")
+					clearInterval(gsFluid.native.restoreQueue.interval);
+				}
+			},
 			init: function() {
 				 gsFluid.native.theme.init();
 				 gsFluid.native.lightbox.init();
@@ -466,7 +490,7 @@ gsFluid = {			// global object
 			init: function() {
 				// check badge sometimes
 				gsFluid.dock.badge();
-				setTimeout(15000, gsFluid.dock.badge);
+				setInterval(gsFluid.dock.badge, 29000);
 				// subscribe menu & growl
 				$.subscribe('gs.player.playing', gsFluid.dock.update);
 				$.subscribe('gs.player.paused', gsFluid.dock.update);
@@ -477,11 +501,14 @@ gsFluid = {			// global object
 				gsFluid.dock.menu.write( gsFluid.dock.menu.build() );
 			},
 			badge: function() {
-				gsFluid.debug("Badging");
-				var $badge = jQuery('.nav_count');
-				if ($badge.length) {
-					window.fluid.dockBadge = $badge.innerText;
+				var badgeNumber = $('#header_nav_people').text()/1
+				if (badgeNumber) {
+					window.fluid.dockBadge = badgeNumber;
+				} else {
+					window.fluid.dockBadge = null;
 				}
+				gsFluid.debug("Badged with data ", window.fluid.dockBadge);
+				
 			},
 			update: function( data ){				
 				document.title = 'Grooveshark';
@@ -1072,11 +1099,14 @@ gsFluid = {			// global object
 					} else {
 						gsFluid.debug('URL ', url, 'is already present; discarding');
 					}
-				})
+				});
 				
 				$('.removeThemeRepoButton').mouseup(gsFluid.ui.removeRepoClick);
 				
 				$('.gsFluid_theme > a').click( gsFluid.ui.selectThemeClick );
+				
+				//Save preferences
+				// $(.gsFluid)
 			},
 			settingsHTML: function() {
 				var html = "";
@@ -1089,12 +1119,19 @@ gsFluid = {			// global object
 					}
 				}
 				html += gsFluid.ui.addRepoForm();
+				
+				html += '<div class="shadow"></div>'
+				html += '<div class="sectionHeader">';
+				html += 	'<h3>Preferences</h3>';
+				html += '</div>';
+				html += gsFluid.ui.prefsForm(); // @TODO
+				
 				return html;
 			},
 			drawButton: function( text, classes, style ) {
 				style = (style === undefined ) ? '4' : style;
 				classes = (classes === undefined ) ? [] : classes;
-				var r = '<button class="btn_style'+style+' '+ classes.join(" ") +'"> <div> <span>'+ text +'</span> </div> </button>';
+				var r = '<button class="btn btn_style'+style+' '+ classes.join(" ") +'"> <div> <span>'+ text +'</span> </div> </button>';
 				return r;
 			},
 			drawTextfield: function( name, tooltip, classes, defaultvalue ) {
@@ -1163,6 +1200,32 @@ gsFluid = {			// global object
 				html +=		gsFluid.ui.drawButton( 'Add Repo', ['addRepoButton'] );
 				html += '</div>';
 				html += '<div class="clear"> </div>';
+				html += '<div class="shadow"> </div>';
+				html += '</div>'
+				
+				return html;
+			},
+			prefsForm: function( preftable ) { //@WORKINGONIT
+				var table = preftable || { savePlaying: {type: 'checkbox', def: true} };
+				var html = '<div class="lightbox_content_block separatedContent"> <div class="shadow"></div> <form id="gsFluid_Preferences" class="vertical">';
+				html += '<ul class="checkbox_wrapper">'
+				// do we want to save current playing? Hint: we do.
+				html += '<li>'
+				html +=		'<input type="checkbox" id="gsFluid_savePlaying" name="gsFluid_savePlaying" '+ (gsFluid.pref.p.savePlaying ? 'checked="checked"' : '') +' />'
+				html +=		'<label class="value label" for="gsFluid_savePlaying">Save my playing songs and restore them when I return</label>'
+				html +=	'</li>'
+				
+				// for (setting in table) { // HOW ABOUT NO?
+				// 	if (table.hasOwnProperty(setting)) {
+				// 		switch( table['setting'].type ) {
+				// 			case 'checkbox':
+				// 				html += 
+				// 		}
+				// 	}
+				// }
+				html += '</ul>'
+				html += gsFluid.ui.drawButton( 'Save Preferences', ['savePrefsButton'] );
+				html += '</form> <div class="clear"></div> </div>'
 				
 				return html;
 			}
@@ -1233,8 +1296,13 @@ gsFluid = {			// global object
 						gsFluid.debug('Making new JSuuid');
 						gsFluid.pref.p.JSuuid = gsFluid.pref.generateUUID();
 					}
+					
+					if (typeof gsFluid.pref.p.savePlaying === "undefined") {
+						gsFluid.pref.p.savePlaying = true;
+					}
 					// save changes now
 					gsFluid.pref.save();
+					
 					
 					// save preferences on close
 					// should be dynamic instead
@@ -1255,7 +1323,7 @@ gsFluid = {			// global object
 		// TODO finish platform detection and switching so we can run this as
 		// a fluid instance, a prism webapp, and maybe even a Chrome userscript
 		platform: { // this should run first to detect availible featres
-			prefMethod: 'json_cookie', // how should we store preferences?
+			prefMethod: 'json_cookie', // how should we store preferences? // NOTE: unused
 			fluid: 		true, // enables dock support
 			mozilla: 	false,
 			horizontalChrome: false,
@@ -1322,9 +1390,18 @@ gsFluid = {			// global object
 					gsFluid.debug("Version check failed with error ", err);
 				}
 			},
+			enviroment: function() { // determines what sort of browser we are
+				if (window.fluid) return "fluid";
+				if (window.platform) return "prism";
+			},
+			
 			init: function(){
 				window.fluid.include(window.fluid.userscriptPath+'.uuid.js');
-				gsFluid.platform.user.email = GS.user['Email'];
+				try {
+					gsFluid.platform.user.email = GS.user['Email'];
+				} catch(err) {
+					gsFluid.debug("couldn't recognize user email");
+				}
 				
 				console.log("Retrieving preferences...");
 				gsFluid.pref.init();
@@ -1347,60 +1424,77 @@ gsFluid = {			// global object
 		
 		init: function() {
 			// TODO rewrite init to load preferences first
-			console.log("Initializing gsFluid, the unofficial Grooveshark Desktop client \nCopyright (c) 2011 Jake Teton-Landis <just.1.jake@gmail.com> \nversion:", gsFluid.version);
-			try {
-				console.log("Registering platform..."); // includes gsFluid.pref.init();
-				gsFluid.platform.init();
-			
-			
-				console.log("Initializing gsFluid.player");
-				gsFluid.player.init();
-			
-				console.log("Initializing gsFluid.native");
-				gsFluid.native.init();
-			
-				console.log("Initializing gsFluid.enablePremium");
-				gsFluid.enablePremium();
-			
-				console.log("Initializing gsFluid.dock");
-				gsFluid.dock.init();
-			
-				mediaKeysPlugin = { // In my ideal world this works for apple remote too
-					forward: gsFluid.player.next,
-					backward: gsFluid.player.prev,
-					play: gsFluid.player.togglePlay
-				};	
-			
-				console.log("Initializing gsFluid.window");
-				gsFluid.window.init();
-			
-				console.log("Initializing gsFluid.theme");
-				gsFluid.theme.init();
-			
-				console.log("Initializing gsFluid.css");
-				gsFluid.css.init();
-			
-				console.log("Initializing gsFluid.lightbox");
-				gsFluid.lightbox.init();
-			
-				console.log("Initializing gsFluid.ui");
-				gsFluid.ui.init();
+			if (typeof GS === "object") {
+				console.log("Initializing gsFluid, the unofficial Grooveshark Desktop client \nCopyright (c) 2011 Jake Teton-Landis <just.1.jake@gmail.com> \nversion:", gsFluid.version);
 				
-				console.log("Checking for updates...")
-				gsFluid.platform.checkForUpdates('http://jake.teton-landis.org/projects/gsFluid/resources/version.json')
+				// clear timeout
+				if (typeof gsFluidInitTry === "number") {
+					clearInterval(gsFluidInitTry)
+				}
 				
-				console.log("gsFluid loaded successfully!");
-				return true;
-			} catch (error) {
-				console.log("+ ====================== +\n  ERROR LOADING gsFluid:", error, "\n+ ====================== +");
+				try {
+					console.log("Registering platform..."); // includes gsFluid.pref.init();
+					gsFluid.platform.init();
+			
+			
+					console.log("Initializing gsFluid.player");
+					gsFluid.player.init();
+			
+					console.log("Initializing gsFluid.native");
+					gsFluid.native.init();
+			
+					console.log("Initializing gsFluid.enablePremium");
+					gsFluid.enablePremium();
+			
+					console.log("Initializing gsFluid.dock");
+					gsFluid.dock.init();
+			
+					mediaKeysPlugin = { // In my ideal world this works for apple remote too
+						forward: gsFluid.player.next,
+						backward: gsFluid.player.prev,
+						play: gsFluid.player.togglePlay
+					};	
+			
+					console.log("Initializing gsFluid.window");
+					gsFluid.window.init();
+			
+					console.log("Initializing gsFluid.theme");
+					gsFluid.theme.init();
+			
+					console.log("Initializing gsFluid.css");
+					gsFluid.css.init();
+			
+					console.log("Initializing gsFluid.lightbox");
+					gsFluid.lightbox.init();
+			
+					console.log("Initializing gsFluid.ui");
+					gsFluid.ui.init();
+				
+					console.log("Checking for updates...")
+					gsFluid.platform.checkForUpdates('http://jake.teton-landis.org/projects/gsFluid/resources/version.json')
+				
+					console.log("gsFluid loaded successfully!");
+					
+					// restore queue?
+					if (gsFluid.pref.p.savePlaying) {
+						gsFluid.native.restoreQueue.begin();
+					}
+					
+					
+					return true;
+				} catch (error) { // prevents messy failures, but messes up your debugger. Comment out try .. catch
+					console.log("+ ====================== +\n  ERROR LOADING gsFluid:", error, "\n+ ====================== +");
+				}
+			} else {
+				gsFluid.debug("Waiting for Grooveshark to load");
+				if (typeof gsFluidInitTry === "undefined") {
+					gsFluidInitTry = setInterval(gsFluid.init, 75); // lol global variable
+				}
 			}
 		}
 }; // end gsFluid
 
 // This script is currently for Fluid.app SSBs only
 (function () {
-    if (window.fluid) {
-		gsFluid.isFluidInstance = true;
 		gsFluid.init();
-    }
 })();
