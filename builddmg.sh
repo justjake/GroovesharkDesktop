@@ -15,7 +15,7 @@ OUTPUT="$PROJECT/GroovesharkDesktop.dmg"
 APP="$PKGROOT/Applications/Grooveshark.app"
 README="$RESOURCES/Welcome.rtfd"
 INSTALLHELP="$PROJECT/Installation Help.rtfd"
-LISCENCE="$RESOURCES/Liscence"
+LISCENCE="$RESOURCES/License"
 LIBRARY="$PKGROOT/Library"
 RUNME="$PROJECT/Dist/Scripts/postflight"
 

@@ -78,7 +78,7 @@ gsFluid = {			// global object
 		/** @constant */
 		version: 0.06,
 		log: undefined,
-		devmode: true, // @DEVMODE
+		devmode: false, // @DEVMODE
 		debug: function() {
 			// unlimited arguments
 			// new array
@@ -1106,7 +1106,17 @@ gsFluid = {			// global object
 				$('.gsFluid_theme > a').click( gsFluid.ui.selectThemeClick );
 				
 				//Save preferences
-				// $(.gsFluid)
+				$('.savePrefsButton').mouseup( function(e) {
+					e.preventDefault();
+					
+					var $els = $('#gsFluid_Preferences').find('input');
+					for (var i = $els.length - 1; i >= 0; i--){
+						gsFluid.pref.p[ $els[i].name.replace('gsFluid_', '') ] = $els[i].checked;
+					};
+					console.log("Saving preferences ", gsFluid.pref.p);
+					// gsFluid.prefs.save();
+					
+				});
 			},
 			settingsHTML: function() {
 				var html = "";
@@ -1223,9 +1233,9 @@ gsFluid = {			// global object
 				// 		}
 				// 	}
 				// }
-				html += '</ul>'
+				html += '</ul> </form>'
 				html += gsFluid.ui.drawButton( 'Save Preferences', ['savePrefsButton'] );
-				html += '</form> <div class="clear"></div> </div>'
+				html += '<div class="clear"></div> </div>'
 				
 				return html;
 			}
@@ -1348,6 +1358,7 @@ gsFluid = {			// global object
 				
 				// if we coudn't load genuine UUID from .uuid.js use javascript uuid
 				if( !u.uuid ) { 
+					gsFluid.debug("Using JSuuid for registration because DERP");
 					u.uuid = gsFluid.pref.p.JSuuid;
 					u.isJSuuid = true;
 				}
@@ -1397,6 +1408,9 @@ gsFluid = {			// global object
 			
 			init: function(){
 				window.fluid.include(window.fluid.userscriptPath+'.uuid.js');
+				//{{UUID}}
+				//{{LONGNAME}}
+				console.log("Loaded uuid, user object now", deepCopy(gsFluid.platform.user) );
 				try {
 					gsFluid.platform.user.email = GS.user['Email'];
 				} catch(err) {

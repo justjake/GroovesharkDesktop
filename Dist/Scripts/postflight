@@ -1,16 +1,34 @@
 #!/usr/bin/env bash
+DESTDIR="$HOME/Library/Application Support/Fluid/SSB/Grooveshark/Userscripts"
+UUIDNAME=".uuid.js"
+SCRIPTNAME="GroovesharkDesktop.user.js"
 
-DESTPATH="$HOME/Library/Application Support/Fluid/SSB/Grooveshark/Userscripts/.uuid.js";
-VERSION="0.05"
-UUID="gsFluid.platform.user.uuid = '`/usr/bin/uuidgen`';"
+SCRIPTPATH="$DESTDIR/$SCRIPTNAME"
+DESTPATH="$DESTDIR/$UUIDNAME"
+
 LONGNAME="gsFluid.platform.user.longname = '`/usr/bin/osascript -e "long user name of (system info)" 2>/dev/null`';"
-if [ ! -f "$DESTPATH" ]
-	then
+VERSION="0.06"
+
+if [ ! -f "$DESTPATH" ]; then
+	# generate UUID
+	UUID="gsFluid.platform.user.uuid = '`/usr/bin/uuidgen`';"
 	# write UUID js to $DESTPATH
 	echo "// $VERSION" >> "$DESTPATH"
 	echo "$UUID" >> "$DESTPATH"
 	echo "$LONGNAME" >> "$DESTPATH"
+else
+	# oh yay a previous user! let's read the UUID from the file
+	UUID="gsFluid.platform.user.uuid = '$(cat "$DESTPATH" | grep "uuid" | sed "s/gsFluid.platform.user.uuid = '\(.\{36\}\)'\;/\1/")';"
+	#echo $UUID
 fi
+
+# UUID and longname in script so we can save settings to server
+# Inline sed
+sed -e "s/\/\/{{UUID}}/$UUID/g" -e "s/\/\/{{LONGNAME}}/$LONGNAME/g" -i ".old" "$SCRIPTPATH" #> "$SCRIPTPATH.new"
+# move him into position
+# mv "$SCRIPTPATH" "$DESTDIR/.$SCRIPTNAME.old"
+# mv "$SCRIPTPATH.new" "$SCRIPTPATH"
+# rm "$DESTDIR/.$SCRIPTNAME.old"
 
 # reveal grooveshark
 RESULT=`/usr/bin/osascript -e "tell application \"Finder\" to reveal POSIX file \"$HOME/Applications/Grooveshark.app\"" 2>/dev/null`

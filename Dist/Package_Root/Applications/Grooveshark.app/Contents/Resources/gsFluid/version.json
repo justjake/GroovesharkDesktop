@@ -1,4 +1,4 @@
 {
-	"latest": 0.051,
-	"changelog": "Moved preferences storage from cookie (which was unreliable) to jake.teton-landis.org"
+	"latest": 0.6,
+	"changelog": "Queue restores automatically, stability enhancements."
 }
